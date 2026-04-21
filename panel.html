@@ -7,35 +7,33 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
 <div class="app-shell">
-  <header class="topbar">
-    <div>
-      <div class="brand">ZANTOS</div>
-      <div class="subtitle">Panel profesional de casos</div>
-    </div>
-    <nav class="nav-links">
-      <a href="index.html">Formulario</a>
-      <a href="panel.html">Panel</a>
-    </nav>
-  </header>
+<header class="topbar">
+<div>
+<div class="brand">ZANTOS</div>
+<div class="subtitle">Panel profesional de casos</div>
+</div>
+<nav class="nav-links">
+<a href="index.html">Formulario</a>
+<a href="panel.html">Panel</a>
+</nav>
+</header>
 
-  <main>
-    <section class="card hero">
-      <h1>Casos recibidos</h1>
-      <p>Casos creados desde el formulario y guardados en Supabase.</p>
-    </section>
+<main>
+<section class="card hero">
+<h1>Casos recibidos</h1>
+<p>Casos creados desde el formulario y guardados en Supabase.</p>
+</section>
 
-    <section id="estadoCarga" class="card">
-      <p>Cargando casos...</p>
-    </section>
+<section id="estadoCarga" class="card">
+<p>Cargando casos...</p>
+</section>
 
-    <section id="casosContainer"></section>
-  </main>
+<section id="casosContainer"></section>
+</main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 const supabaseUrl = 'https://wzsyybrqycqcmouhmlzy.supabase.co';
 const supabaseKey = 'sb_publishable_V5e8LxY7my69nDSOUYRGsA_UxvDzPrl';
@@ -46,75 +44,160 @@ const estadoCarga = document.getElementById('estadoCarga');
 
 let cases = [];
 
+function textoSeguro(valor, fallback) {
+if (fallback === undefined) fallback = '-';
+if (valor === null || valor === undefined || valor === '') return fallback;
+return String(valor);
+}
+
+function obtenerFecha(caso) {
+if (!caso || !caso.fecha_creacion) return '-';
+try {
+return new Date(caso.fecha_creacion).toLocaleString();
+} catch (e) {
+return caso.fecha_creacion;
+}
+}
+
+function estadoClase(estado) {
+if (estado === 'nuevo') return 'badge badge-blue';
+if (estado === 'en_proceso') return 'badge badge-yellow';
+if (estado === 'cerrado') return 'badge badge-green';
+return 'badge';
+}
+
+function crearParrafo(html) {
+const p = document.createElement('p');
+p.innerHTML = html;
+return p;
+}
+
 function render() {
-  estadoCarga.style.display = 'none';
+estadoCarga.style.display = 'none';
+container.innerHTML = '';
 
-  if (!cases.length) {
-    container.innerHTML = '<section class="card"><p>No hay casos aún.</p></section>';
-    return;
-  }
+if (!cases.length) {
+const emptyCard = document.createElement('section');
+emptyCard.className = 'card';
 
-  container.innerHTML = cases.map((caso, i) => `
-    <section class="card">
-      <h2>${caso.nombre_perro || '-'}</h2>
+const p = document.createElement('p');
+p.textContent = 'No hay casos aún.';
+emptyCard.appendChild(p);
 
-      <p style="font-size:18px;font-weight:600;">
-        ${caso.motivo_consulta || '-'}
-      </p>
+container.appendChild(emptyCard);
+return;
+}
 
-      <p><strong>Tutor:</strong> ${caso.nombre_tutor || '-'}</p>
-      <p><strong>Plan:</strong> ${caso.plan_sugerido || '-'}</p>
-      <p><strong>Estado:</strong> ${caso.estado || '-'}</p>
-      <p><strong>Fecha:</strong> ${new Date(caso.fecha_creacion).toLocaleString()}</p>
+for (let i = 0; i < cases.length; i++) {
+const caso = cases[i];
 
-      <div class="row actions">
-        <button onclick="abrirFicha(${i})">Abrir ficha</button>
-        <button onclick="eliminarCaso('${caso.id}')">Eliminar</button>
-      </div>
-    </section>
-  `).join('');
+const card = document.createElement('section');
+card.className = 'card';
+
+const title = document.createElement('h2');
+title.textContent = textoSeguro(caso.nombre_perro);
+card.appendChild(title);
+
+const motivo = document.createElement('p');
+motivo.textContent = textoSeguro(caso.motivo_consulta);
+motivo.style.fontSize = '18px';
+motivo.style.fontWeight = '600';
+motivo.style.margin = '6px 0 14px 0';
+card.appendChild(motivo);
+
+const grid = document.createElement('div');
+grid.className = 'grid-2';
+
+const left = document.createElement('div');
+left.appendChild(crearParrafo('<strong>Tutor:</strong> ' + textoSeguro(caso.nombre_tutor)));
+left.appendChild(crearParrafo('<strong>Plan:</strong> ' + textoSeguro(caso.plan_sugerido)));
+
+const right = document.createElement('div');
+
+const estadoP = document.createElement('p');
+estadoP.innerHTML = '<strong>Estado:</strong> ';
+const badge = document.createElement('span');
+badge.className = estadoClase(caso.estado);
+badge.textContent = textoSeguro(caso.estado);
+estadoP.appendChild(badge);
+
+right.appendChild(estadoP);
+right.appendChild(crearParrafo('<strong>Subestado:</strong> ' + textoSeguro(caso.subestado)));
+right.appendChild(crearParrafo('<strong>Fecha:</strong> ' + textoSeguro(obtenerFecha(caso))));
+
+grid.appendChild(left);
+grid.appendChild(right);
+card.appendChild(grid);
+
+const actions = document.createElement('div');
+actions.className = 'row actions';
+
+const openBtn = document.createElement('button');
+openBtn.className = 'secondary';
+openBtn.textContent = 'Abrir ficha';
+openBtn.onclick = function() {
+abrirFicha(i);
+};
+
+const deleteBtn = document.createElement('button');
+deleteBtn.textContent = 'Eliminar';
+deleteBtn.onclick = function() {
+eliminarCaso(caso.id);
+};
+
+actions.appendChild(openBtn);
+actions.appendChild(deleteBtn);
+card.appendChild(actions);
+
+container.appendChild(card);
+}
 }
 
 async function cargarCasos() {
-  const { data, error } = await supabaseClient
-    .from('casos')
-    .select('*')
-    .order('fecha_creacion', { ascending: false });
+estadoCarga.innerHTML = '<p>Cargando casos...</p>';
 
-  if (error) {
-    console.error(error);
-    estadoCarga.innerHTML = '<p>Error al cargar casos</p>';
-    return;
-  }
+const respuesta = await supabaseClient
+.from('casos')
+.select('*')
+.order('fecha_creacion', { ascending: false });
 
-  cases = data || [];
-  render();
+const data = respuesta.data;
+const error = respuesta.error;
+
+if (error) {
+console.error('Error al cargar casos:', error);
+estadoCarga.innerHTML = '<p>Error al cargar casos desde Supabase.</p>';
+return;
 }
 
-window.abrirFicha = function(i) {
-  const caso = cases[i];
-  if (!caso) return;
-  window.location.href = ficha.html?id=${caso.id};
-};
+cases = data || [];
+render();
+}
 
-window.eliminarCaso = async function(id) {
-  if (!confirm('¿Eliminar caso?')) return;
+function abrirFicha(i) {
+const caso = cases[i];
+if (!caso) return;
+window.location.href = 'ficha.html?id=' + encodeURIComponent(caso.id);
+}
 
-  const { error } = await supabaseClient
-    .from('casos')
-    .delete()
-    .eq('id', id);
+async function eliminarCaso(id) {
+if (!confirm('¿Eliminar este caso?')) return;
 
-  if (error) {
-    alert('Error al eliminar');
-    return;
-  }
+const respuesta = await supabaseClient
+.from('casos')
+.delete()
+.eq('id', id);
 
-  cargarCasos();
-};
+if (respuesta.error) {
+console.error('Error al eliminar caso:', respuesta.error);
+alert('No se pudo eliminar el caso.');
+return;
+}
+
+cargarCasos();
+}
 
 cargarCasos();
 </script>
-
 </body>
 </html>
