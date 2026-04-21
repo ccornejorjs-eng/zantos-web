@@ -1,174 +1,352 @@
-const form = document.getElementById('zantosForm');
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZANTOS · Panel de casos</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.modal-backdrop{
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,.45);
+display: none;
+align-items: center;
+justify-content: center;
+padding: 24px;
+z-index: 999;
+}
+.modal-backdrop.active{ display:flex; }
 
+.modal-card{
+width: min(1000px, 96vw);
+max-height: 92vh;
+overflow: auto;
+background: #fff;
+border-radius: 18px;
+box-shadow: 0 20px 60px rgba(0,0,0,.18);
+padding: 24px;
+}
+
+.modal-header{
+display:flex;
+justify-content: space-between;
+align-items: flex-start;
+gap: 16px;
+margin-bottom: 16px;
+}
+
+.modal-title-wrap h2{
+margin: 0 0 6px 0;
+}
+
+.modal-subtitle{
+color: #666;
+font-size: .95rem;
+}
+
+.close-btn{
+border: 1px solid #ddd;
+background: #fff;
+border-radius: 10px;
+padding: 10px 14px;
+cursor: pointer;
+}
+
+.ficha-grid{
+display:grid;
+grid-template-columns: repeat(2, minmax(0,1fr));
+gap: 16px;
+}
+
+.ficha-section{
+border: 1px solid #ececec;
+border-radius: 16px;
+padding: 16px;
+background: #fff;
+}
+
+.ficha-section.full{
+grid-column: 1 / -1;
+}
+
+.ficha-section h3{
+margin-top: 0;
+margin-bottom: 12px;
+font-size: 1rem;
+}
+
+.ficha-list{
+display:grid;
+gap: 8px;
+}
+
+.ficha-item{
+display:grid;
+grid-template-columns: 180px 1fr;
+gap: 10px;
+align-items: start;
+}
+
+.ficha-item strong{
+color: #222;
+}
+
+.ficha-text{
+white-space: pre-wrap;
+word-break: break-word;
+}
+
+.empty-note{
+color:#666;
+font-style: italic;
+}
+
+@media (max-width: 760px){
+.ficha-grid{ grid-template-columns: 1fr; }
+.ficha-item{ grid-template-columns: 1fr; gap: 4px; }
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+<header class="topbar">
+<div>
+<div class="brand">ZANTOS</div>
+<div class="subtitle">Panel profesional de casos</div>
+</div>
+<nav class="nav-links">
+<a href="index.html">Formulario</a>
+<a href="panel.html">Panel</a>
+</nav>
+</header>
+
+<main>
+<section class="card hero">
+<h1>Casos recibidos</h1>
+<p>Este panel muestra los casos creados desde el formulario web y guardados en Supabase.</p>
+</section>
+
+<section id="estadoCarga" class="card">
+<p>Cargando casos...</p>
+</section>
+
+<section id="casosContainer"></section>
+</main>
+</div>
+
+<div id="modalBackdrop" class="modal-backdrop" onclick="cerrarFicha(event)">
+<div class="modal-card" onclick="event.stopPropagation()">
+<div class="modal-header">
+<div class="modal-title-wrap">
+<h2 id="fichaTitulo">Ficha del caso</h2>
+<div id="fichaSubtitulo" class="modal-subtitle"></div>
+</div>
+<button class="close-btn" onclick="cerrarFicha()">Cerrar</button>
+</div>
+<div id="fichaContenido"></div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
 const supabaseUrl = 'https://wzsyybrqycqcmouhmlzy.supabase.co';
 const supabaseKey = 'sb_publishable_V5e8LxY7my69nDSOUYRGsA_UxvDzPrl';
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-function checkedValues(name) {
-return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(el => el.value);
+const container = document.getElementById('casosContainer');
+const estadoCarga = document.getElementById('estadoCarga');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const fichaTitulo = document.getElementById('fichaTitulo');
+const fichaSubtitulo = document.getElementById('fichaSubtitulo');
+const fichaContenido = document.getElementById('fichaContenido');
+
+let cases = [];
+
+function textoSeguro(valor, fallback = '-') {
+if (valor === null || valor === undefined || valor === '') return fallback;
+return String(valor);
 }
 
-function value(name) {
-const el = form.elements[name];
-return el ? String(el.value || '').trim() : '';
+function formatearFecha(valor) {
+if (!valor) return '-';
+try {
+return new Date(valor).toLocaleString();
+} catch {
+return valor;
+}
 }
 
-function mapFrecuencia(label) {
-return ({ 'Ocasional': 1, 'Frecuente': 2, 'Muy frecuente': 3, 'Siempre': 4 })[label] || 0;
+function item(label, value) {
+return `
+<div class="ficha-item">
+<strong>${label}</strong>
+<div class="ficha-text">${textoSeguro(value)}</div>
+</div>
+`;
 }
 
-function mapIntensidad(label) {
-return ({ 'Leve': 1, 'Moderado': 2, 'Alto': 3, 'Muy alto': 4 })[label] || 0;
+function section(title, content, full = false) {
+return `
+<section class="ficha-section ${full ? 'full' : ''}">
+<h3>${title}</h3>
+<div class="ficha-list">${content}</div>
+</section>
+`;
 }
 
-function buildCaseRow() {
-const conductas = checkedValues('conductas');
-const contextos = checkedValues('contextos');
-const planEl = form.querySelector('input[name="plan"]:checked');
+function render() {
+estadoCarga.style.display = 'none';
 
-return {
-estado: 'nuevo',
-subestado: 'pendiente_revision',
-
-nombre_perro: value('nombre_perro'),
-edad: `${value('edad_anios')} años ${value('edad_meses')} meses`.trim(),
-raza: value('raza'),
-sexo: value('sexo'),
-esterilizado: value('esterilizado'),
-
-nombre_tutor: value('nombre_tutor'),
-telefono: value('telefono'),
-email: value('correo'),
-pais: value('pais'),
-comuna: value('comuna'),
-
-motivo_consulta: value('motivo_principal'),
-descripcion_problema: value('descripcion_motivo'),
-
-descripcion_conducta: value('descripcion_conducta'),
-desde_cuando: value('desde_cuando'),
-antecedente: value('antecedente'),
-consecuencia: value('consecuencia'),
-disparador: value('disparador'),
-
-frecuencia: value('frecuencia'),
-frecuencia_score: mapFrecuencia(value('frecuencia')),
-intensidad: value('intensidad'),
-intensidad_score: mapIntensidad(value('intensidad')),
-
-mordida: value('mordida'),
-intento_mordida: value('intento_mordida'),
-riesgo_actual: value('riesgo_actual'),
-rompio_piel: value('rompio_piel'),
-atencion_medica: value('atencion_medica'),
-problema_medico: value('problema_medico'),
-evaluacion_veterinaria: value('evaluacion_veterinaria'),
-observaciones_alerta: value('observaciones_alerta'),
-
-objetivo: value('objetivo'),
-nivel_compromiso: value('nivel_compromiso'),
-
-plan_sugerido: planEl ? planEl.value : 'Evaluación inicial',
-score_global: mapFrecuencia(value('frecuencia')) + mapIntensidad(value('intensidad')),
-
-conductas_json: JSON.stringify(conductas),
-contextos_json: JSON.stringify(contextos),
-region: value('region'),
-localidad: value('localidad'),
-problema_secundario: value('problema_secundario'),
-duracion: value('duracion'),
-tipo_vivienda: value('tipo_vivienda'),
-acceso_exterior: value('acceso_exterior'),
-convive_animales: value('convive_animales'),
-convive_ninos: value('convive_ninos'),
-nivel_actividad: value('nivel_actividad'),
-tiempo_solo: value('tiempo_solo'),
-tiempo_paseo: value('tiempo_paseo'),
-rutina_diaria: value('rutina_diaria'),
-inicio_problema: value('inicio_problema'),
-evolucion: value('evolucion'),
-edad_inicio: value('edad_inicio'),
-intervenciones_previas: value('intervenciones_previas'),
-evento_desencadenante: value('evento_desencadenante'),
-descripcion_intervenciones: value('descripcion_intervenciones')
-};
-}
-
-function validate(data) {
-const errors = [];
-if (!data.nombre_perro) errors.push('Falta el nombre del perro.');
-if (!data.nombre_tutor) errors.push('Falta el nombre del responsable.');
-if (!data.motivo_consulta) errors.push('Falta el motivo principal.');
-if (!data.frecuencia) errors.push('Falta la frecuencia.');
-if (!data.intensidad) errors.push('Falta la intensidad.');
-if (!data.observaciones_alerta) errors.push('Faltan observaciones importantes.');
-return errors;
-}
-
-document.querySelectorAll('.collapsible h2').forEach(header => {
-header.addEventListener('click', () => {
-const section = header.parentElement;
-section.classList.toggle('open');
-});
-});
-
-const progressFill = document.getElementById('progressFill');
-
-function calcularProgreso() {
-if (!progressFill) return;
-
-const inputs = form.querySelectorAll('input, select, textarea');
-let total = 0;
-let llenos = 0;
-
-inputs.forEach(i => {
-if (i.type === 'checkbox' || i.type === 'radio') return;
-total++;
-if (i.value && i.value.trim() !== '') llenos++;
-});
-
-const porcentaje = total ? Math.round((llenos / total) * 100) : 0;
-progressFill.style.width = porcentaje + '%';
-}
-
-form.addEventListener('input', calcularProgreso);
-form.addEventListener('change', calcularProgreso);
-
-form.addEventListener('submit', async (e) => {
-e.preventDefault();
-
-const data = buildCaseRow();
-const errors = validate(data);
-
-if (errors.length) {
-alert('No se puede crear el caso todavía:\n\n' + errors.join('\n'));
+if (!cases.length) {
+container.innerHTML = '<section class="card"><p>No hay casos aún.</p></section>';
 return;
 }
+
+container.innerHTML = cases.map((caso, i) => `
+<section class="card">
+<h2>${textoSeguro(caso.nombre_perro)}</h2>
+<div class="grid-2">
+<div>
+<p><strong>Tutor:</strong> ${textoSeguro(caso.nombre_tutor)}</p>
+<p><strong>Motivo principal:</strong> ${textoSeguro(caso.motivo_consulta)}</p>
+<p><strong>Plan:</strong> ${textoSeguro(caso.plan_sugerido)}</p>
+</div>
+<div>
+<p><strong>Estado:</strong> ${textoSeguro(caso.estado)}</p>
+<p><strong>Subestado:</strong> ${textoSeguro(caso.subestado)}</p>
+<p><strong>Fecha:</strong> ${textoSeguro(formatearFecha(caso.fecha_creacion))}</p>
+</div>
+</div>
+<div class="row actions">
+<button class="secondary" onclick="abrirFicha(${i})">Abrir ficha</button>
+<button onclick="eliminarCaso('${caso.id}')">Eliminar</button>
+</div>
+</section>
+`).join('');
+}
+
+async function cargarCasos() {
+estadoCarga.innerHTML = '<p>Cargando casos...</p>';
+
+const { data, error } = await supabaseClient
+.from('casos')
+.select('*')
+.order('fecha_creacion', { ascending: false });
+
+if (error) {
+console.error('Error al cargar casos:', error);
+estadoCarga.innerHTML = '<p>Error al cargar casos desde Supabase.</p>';
+container.innerHTML = '';
+return;
+}
+
+cases = data || [];
+render();
+}
+
+window.abrirFicha = function(i) {
+const caso = cases[i];
+if (!caso) return;
+
+fichaTitulo.textContent = `Ficha · ${textoSeguro(caso.nombre_perro)}`;
+fichaSubtitulo.textContent = `Tutor: ${textoSeguro(caso.nombre_tutor)} · Estado: ${textoSeguro(caso.estado)} · Fecha: ${formatearFecha(caso.fecha_creacion)}`;
+
+fichaContenido.innerHTML = `
+<div class="ficha-grid">
+${section('Resumen del caso', `
+${item('Nombre del perro', caso.nombre_perro)}
+${item('Tutor', caso.nombre_tutor)}
+${item('Motivo principal', caso.motivo_consulta)}
+${item('Plan sugerido', caso.plan_sugerido)}
+${item('Estado', caso.estado)}
+${item('Subestado', caso.subestado)}
+${item('Fecha de creación', formatearFecha(caso.fecha_creacion))}
+${item('Score global', caso.score_global)}
+`)}
+
+${section('Datos del perro', `
+${item('Edad', caso.edad)}
+${item('Raza', caso.raza)}
+${item('Sexo', caso.sexo)}
+${item('Esterilizado', caso.esterilizado)}
+`)}
+
+${section('Datos del responsable', `
+${item('Nombre', caso.nombre_tutor)}
+${item('Teléfono', caso.telefono)}
+${item('Correo', caso.email)}
+${item('País', caso.pais)}
+${item('Comuna', caso.comuna)}
+`)}
+
+${section('Motivo y descripción', `
+${item('Motivo de consulta', caso.motivo_consulta)}
+${item('Descripción del problema', caso.descripcion_problema)}
+`, true)}
+
+${section('Conducta y contexto', `
+${item('Descripción de la conducta', caso.descripcion_conducta)}
+${item('Desde cuándo', caso.desde_cuando)}
+${item('Antecedente', caso.antecedente)}
+${item('Consecuencia', caso.consecuencia)}
+${item('Disparador', caso.disparador)}
+`, true)}
+
+${section('Frecuencia e intensidad', `
+${item('Frecuencia', caso.frecuencia)}
+${item('Frecuencia score', caso.frecuencia_score)}
+${item('Intensidad', caso.intensidad)}
+${item('Intensidad score', caso.intensidad_score)}
+`)}
+
+${section('Seguridad y salud', `
+${item('Mordida', caso.mordida)}
+${item('Intento de mordida', caso.intento_mordida)}
+${item('Riesgo actual', caso.riesgo_actual)}
+${item('Rompió piel', caso.rompio_piel)}
+${item('Atención médica/veterinaria', caso.atencion_medica)}
+${item('Problema médico', caso.problema_medico)}
+${item('Evaluación veterinaria', caso.evaluacion_veterinaria)}
+${item('Observaciones importantes', caso.observaciones_alerta)}
+`, true)}
+
+${section('Objetivo del tutor', `
+${item('Objetivo', caso.objetivo)}
+${item('Nivel de compromiso', caso.nivel_compromiso)}
+`, true)}
+</div>
+`;
+
+modalBackdrop.classList.add('active');
+};
+
+window.cerrarFicha = function(event) {
+if (event && event.target !== modalBackdrop) return;
+modalBackdrop.classList.remove('active');
+};
+
+window.eliminarCaso = async function(id) {
+if (!confirm('¿Eliminar este caso?')) return;
 
 const { error } = await supabaseClient
 .from('casos')
-.insert([data]);
+.delete()
+.eq('id', id);
 
 if (error) {
-console.error('Error al guardar en Supabase:', error);
-alert('Hubo un error al guardar el caso en la base de datos.');
+console.error('Error al eliminar caso:', error);
+alert('No se pudo eliminar el caso.');
 return;
 }
 
-alert('Caso creado correctamente y guardado en la base de datos.');
-form.reset();
+await cargarCasos();
+};
 
-const firstPlan = form.querySelector('input[name="plan"]');
-if (firstPlan) firstPlan.checked = true;
-
-document.querySelectorAll('.collapsible').forEach((section, index) => {
-if (index === 0) {
-section.classList.add('open');
-} else {
-section.classList.remove('open');
-}
-});
-
+cargarCasos();
+</script>
+</body>
+</html>
 calcularProgreso();
 });
 
