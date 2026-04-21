@@ -97,22 +97,6 @@ white-space: pre-wrap;
 word-break: break-word;
 }
 
-.badge-row{
-display:flex;
-flex-wrap: wrap;
-gap: 8px;
-margin-top: 8px;
-}
-
-.badge{
-display:inline-block;
-padding: 6px 10px;
-border-radius: 999px;
-background: #f3f4f6;
-border: 1px solid #e5e7eb;
-font-size: .9rem;
-}
-
 .empty-note{
 color:#666;
 font-style: italic;
@@ -191,13 +175,6 @@ return new Date(valor).toLocaleString();
 } catch {
 return valor;
 }
-}
-
-function badgeList(items) {
-if (!Array.isArray(items) || !items.length) {
-return '<div class="empty-note">Sin información.</div>';
-}
-return `<div class="badge-row">${items.map(item => `<span class="badge">${textoSeguro(item)}</span>`).join('')}</div>`;
 }
 
 function item(label, value) {
