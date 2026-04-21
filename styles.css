@@ -513,10 +513,11 @@ font-size:1.6rem;
 }
 
 .actions button.danger{
-  background:#7f1d1d;
-  color:#fff;
+  background:#fee2e2;       /* rojo suave */
+  color:#7f1d1d;            /* rojo oscuro */
+  border:1px solid #fecaca;
 }
 
 .actions button.danger:hover{
-  background:#991b1b;
+  background:#fecaca;
 }
