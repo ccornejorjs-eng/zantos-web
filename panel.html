@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZANTOS · Panel de casos</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app-shell">
+<header class="topbar">
+  <div><div class="brand">ZANTOS</div><div class="subtitle">Panel profesional de casos</div></div>
+  <nav class="nav-links"><a href="index.html">Formulario</a><a href="panel.html">Panel</a></nav>
+</header>
+<main>
+  <section class="card hero"><h1>Casos recibidos</h1><p>Este panel muestra los casos creados desde el formulario web y guardados en el navegador.</p></section>
+  <section id="casosContainer"></section>
+</main>
+</div>
+<script>
+const container = document.getElementById('casosContainer');
+let cases = JSON.parse(localStorage.getItem('ZANTOS_WEB_CASES') || '[]');
+function render(){
+  if(!cases.length){
+    container.innerHTML = '<section class="card"><p>No hay casos aún.</p></section>';
+    return;
+  }
+  container.innerHTML = cases.map((caso, i) => `
+    <section class="card">
+      <h2>${caso.identificacion.perro}</h2>
+      <div class="grid-2">
+        <div>
+          <p><strong>Tutor:</strong> ${caso.tutor.nombre_tutor}</p>
+          <p><strong>Motivo principal:</strong> ${caso.evaluacion.motivoConsulta}</p>
+          <p><strong>Plan:</strong> ${caso.planContratado}</p>
+        </div>
+        <div>
+          <p><strong>Estado:</strong> ${caso.metadata.estadoCaso}</p>
+          <p><strong>Subestado:</strong> ${caso.metadata.subestado}</p>
+          <p><strong>Fecha:</strong> ${new Date(caso.fecha).toLocaleString()}</p>
+        </div>
+      </div>
+      <div class="row actions">
+        <button class="secondary" onclick="verCaso(${i})">Ver objeto</button>
+        <button onclick="eliminarCaso(${i})">Eliminar</button>
+      </div>
+    </section>`).join('');
+}
+function verCaso(i){ alert(JSON.stringify(cases[i], null, 2)); }
+function eliminarCaso(i){
+  if(!confirm('¿Eliminar este caso?')) return;
+  cases.splice(i,1);
+  localStorage.setItem('ZANTOS_WEB_CASES', JSON.stringify(cases));
+  render();
+}
+render();
+</script>
+</body>
+</html>
