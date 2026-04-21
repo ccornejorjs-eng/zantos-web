@@ -431,3 +431,28 @@ gap:4px;
 font-size:1.6rem;
 }
 }
+.section.collapsible h2{
+  cursor:pointer;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.section.collapsible h2::after{
+  content:"+";
+  font-weight:bold;
+  transition:.2s;
+}
+
+.section.collapsible.open h2::after{
+  content:"–";
+}
+
+.section.collapsible .section-content{
+  display:none;
+  margin-top:10px;
+}
+
+.section.collapsible.open .section-content{
+  display:block;
+}
