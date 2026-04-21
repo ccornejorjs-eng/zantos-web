@@ -5,147 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ZANTOS · Panel de casos</title>
 <link rel="stylesheet" href="styles.css">
-<style>
-.modal-backdrop{
-position: fixed;
-inset: 0;
-background: rgba(0,0,0,.45);
-display: none;
-align-items: center;
-justify-content: center;
-padding: 24px;
-z-index: 999;
-}
-.modal-backdrop.active{ display:flex; }
-
-.modal-card{
-width: min(1000px, 96vw);
-max-height: 92vh;
-overflow: auto;
-background: #fff;
-border-radius: 18px;
-box-shadow: 0 20px 60px rgba(0,0,0,.18);
-padding: 24px;
-}
-
-.modal-header{
-display:flex;
-justify-content: space-between;
-align-items: flex-start;
-gap: 16px;
-margin-bottom: 16px;
-}
-
-.modal-title-wrap h2{
-margin: 0 0 6px 0;
-}
-
-.modal-subtitle{
-color: #666;
-font-size: .95rem;
-}
-
-.close-btn{
-border: 1px solid #ddd;
-background: #fff;
-border-radius: 10px;
-padding: 10px 14px;
-cursor: pointer;
-}
-
-.ficha-grid{
-display:grid;
-grid-template-columns: repeat(2, minmax(0,1fr));
-gap: 16px;
-}
-
-.ficha-section{
-border: 1px solid #ececec;
-border-radius: 16px;
-padding: 16px;
-background: #fff;
-}
-
-.ficha-section.full{
-grid-column: 1 / -1;
-}
-
-.ficha-section h3{
-margin-top: 0;
-margin-bottom: 12px;
-font-size: 1rem;
-}
-
-.ficha-list{
-display:grid;
-gap: 8px;
-}
-
-.ficha-item{
-display:grid;
-grid-template-columns: 180px 1fr;
-gap: 10px;
-align-items: start;
-}
-
-.ficha-item strong{
-color: #222;
-}
-
-.ficha-text{
-white-space: pre-wrap;
-word-break: break-word;
-}
-
-.empty-note{
-color:#666;
-font-style: italic;
-}
-
-@media (max-width: 760px){
-.ficha-grid{ grid-template-columns: 1fr; }
-.ficha-item{ grid-template-columns: 1fr; gap: 4px; }
-}
-</style>
 </head>
 <body>
 <div class="app-shell">
-<header class="topbar">
-<div>
-<div class="brand">ZANTOS</div>
-<div class="subtitle">Panel profesional de casos</div>
-</div>
-<nav class="nav-links">
-<a href="index.html">Formulario</a>
-<a href="panel.html">Panel</a>
-</nav>
-</header>
+  <header class="topbar">
+    <div>
+      <div class="brand">ZANTOS</div>
+      <div class="subtitle">Panel profesional de casos</div>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Formulario</a>
+      <a href="panel.html">Panel</a>
+    </nav>
+  </header>
 
-<main>
-<section class="card hero">
-<h1>Casos recibidos</h1>
-<p>Este panel muestra los casos creados desde el formulario web y guardados en Supabase.</p>
-</section>
+  <main>
+    <section class="card hero">
+      <h1>Casos recibidos</h1>
+      <p>Este panel muestra los casos creados desde el formulario web y guardados en Supabase.</p>
+    </section>
 
-<section id="estadoCarga" class="card">
-<p>Cargando casos...</p>
-</section>
+    <section id="estadoCarga" class="card">
+      <p>Cargando casos...</p>
+    </section>
 
-<section id="casosContainer"></section>
-</main>
-</div>
-
-<div id="modalBackdrop" class="modal-backdrop" onclick="cerrarFicha(event)">
-<div class="modal-card" onclick="event.stopPropagation()">
-<div class="modal-header">
-<div class="modal-title-wrap">
-<h2 id="fichaTitulo">Ficha del caso</h2>
-<div id="fichaSubtitulo" class="modal-subtitle"></div>
-</div>
-<button class="close-btn" onclick="cerrarFicha()">Cerrar</button>
-</div>
-<div id="fichaContenido"></div>
-</div>
+    <section id="casosContainer"></section>
+  </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -156,94 +41,83 @@ const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 const container = document.getElementById('casosContainer');
 const estadoCarga = document.getElementById('estadoCarga');
-const modalBackdrop = document.getElementById('modalBackdrop');
-const fichaTitulo = document.getElementById('fichaTitulo');
-const fichaSubtitulo = document.getElementById('fichaSubtitulo');
-const fichaContenido = document.getElementById('fichaContenido');
 
 let cases = [];
 
 function textoSeguro(valor, fallback = '-') {
-if (valor === null || valor === undefined || valor === '') return fallback;
-return String(valor);
+  if (valor === null || valor === undefined || valor === '') return fallback;
+  return String(valor);
 }
 
-function formatearFecha(valor) {
-if (!valor) return '-';
-try {
-return new Date(valor).toLocaleString();
-} catch {
-return valor;
-}
-}
-
-function item(label, value) {
-return `
-<div class="ficha-item">
-<strong>${label}</strong>
-<div class="ficha-text">${textoSeguro(value)}</div>
-</div>
-`;
+function obtenerFecha(caso) {
+  if (!caso || !caso.fecha_creacion) return '-';
+  try {
+    return new Date(caso.fecha_creacion).toLocaleString();
+  } catch {
+    return caso.fecha_creacion;
+  }
 }
 
-function section(title, content, full = false) {
-return `
-<section class="ficha-section ${full ? 'full' : ''}">
-<h3>${title}</h3>
-<div class="ficha-list">${content}</div>
-</section>
-`;
+function estadoBadge(estado) {
+  if (estado === 'nuevo') return 'badge badge-blue';
+  if (estado === 'en_proceso') return 'badge badge-yellow';
+  if (estado === 'cerrado') return 'badge badge-green';
+  return 'badge';
 }
 
 function render() {
-console.log('render ejecutado', cases);
-estadoCarga.style.display = 'none';
+  estadoCarga.style.display = 'none';
 
-if (!cases.length) {
-container.innerHTML = '<section class="card"><p>No hay casos aún.</p></section>';
-return;
-}
+  if (!cases.length) {
+    container.innerHTML = '<section class="card"><p>No hay casos aún.</p></section>';
+    return;
+  }
 
-container.innerHTML = cases.map((caso, i) => `
-<section class="card">
-<h2>${textoSeguro(caso.nombre_perro)}</h2>
-<div class="grid-2">
-<div>
-<p><strong>Tutor:</strong> ${textoSeguro(caso.nombre_tutor)}</p>
-<p><strong>Motivo principal:</strong> ${textoSeguro(caso.motivo_consulta)}</p>
-<p><strong>Plan:</strong> ${textoSeguro(caso.plan_sugerido)}</p>
-</div>
-<div>
-<p><strong>Estado:</strong> ${textoSeguro(caso.estado)}</p>
-<p><strong>Subestado:</strong> ${textoSeguro(caso.subestado)}</p>
-<p><strong>Fecha:</strong> ${textoSeguro(formatearFecha(caso.fecha_creacion))}</p>
-</div>
-</div>
-<div class="row actions">
-<button class="secondary" onclick="abrirFicha(${i})">Abrir ficha</button>
-<button onclick="eliminarCaso('${caso.id}')">Eliminar</button>
-</div>
-</section>
-`).join('');
+  container.innerHTML = cases.map((caso, i) => `
+    <section class="card">
+      <h2>${textoSeguro(caso.nombre_perro)}</h2>
+
+      <p style="font-size:18px;font-weight:600;margin:6px 0 14px 0;">
+        ${textoSeguro(caso.motivo_consulta)}
+      </p>
+
+      <div class="grid-2">
+        <div>
+          <p><strong>Tutor:</strong> ${textoSeguro(caso.nombre_tutor)}</p>
+          <p><strong>Plan:</strong> ${textoSeguro(caso.plan_sugerido)}</p>
+        </div>
+        <div>
+          <p><strong>Estado:</strong> <span class="${estadoBadge(caso.estado)}">${textoSeguro(caso.estado)}</span></p>
+          <p><strong>Subestado:</strong> ${textoSeguro(caso.subestado)}</p>
+          <p><strong>Fecha:</strong> ${textoSeguro(obtenerFecha(caso))}</p>
+        </div>
+      </div>
+
+      <div class="row actions">
+        <button class="secondary" onclick="abrirFicha(${i})">Abrir ficha</button>
+        <button onclick="eliminarCaso('${caso.id}')">Eliminar</button>
+      </div>
+    </section>
+  `).join('');
 }
 
 async function cargarCasos() {
-estadoCarga.innerHTML = '<p>Cargando casos...</p>';
+  estadoCarga.innerHTML = '<p>Cargando casos...</p>';
 
-const { data, error } = await supabaseClient
-.from('casos')
-.select('*')
-.order('fecha_creacion', { ascending: false });
-console.log('respuesta supabase', { data, error });
-if (error) {
-console.error('Error al cargar casos:', error);
-estadoCarga.innerHTML = '<p>Error al cargar casos desde Supabase.</p>';
-container.innerHTML = '';
-return;
-}
+  const { data, error } = await supabaseClient
+    .from('casos')
+    .select('*')
+    .order('fecha_creacion', { ascending: false });
 
-cases = data || [];
-render();
+  if (error) {
+    console.error('Error al cargar casos:', error);
+    estadoCarga.innerHTML = '<p>Error al cargar casos desde Supabase.</p>';
+    container.innerHTML = '';
+    return;
+  }
+
+  cases = data || [];
+  render();
 }
 
 window.abrirFicha = function(i) {
@@ -251,95 +125,22 @@ window.abrirFicha = function(i) {
   if (!caso) return;
   window.location.href = ficha.html?id=${caso.id};
 };
-fichaContenido.innerHTML = `
-<div class="ficha-grid">
-${section('Resumen del caso', `
-${item('Nombre del perro', caso.nombre_perro)}
-${item('Tutor', caso.nombre_tutor)}
-${item('Motivo principal', caso.motivo_consulta)}
-${item('Plan sugerido', caso.plan_sugerido)}
-${item('Estado', caso.estado)}
-${item('Subestado', caso.subestado)}
-${item('Fecha de creación', formatearFecha(caso.fecha_creacion))}
-${item('Score global', caso.score_global)}
-`)}
-
-${section('Datos del perro', `
-${item('Edad', caso.edad)}
-${item('Raza', caso.raza)}
-${item('Sexo', caso.sexo)}
-${item('Esterilizado', caso.esterilizado)}
-`)}
-
-${section('Datos del responsable', `
-${item('Nombre', caso.nombre_tutor)}
-${item('Teléfono', caso.telefono)}
-${item('Correo', caso.email)}
-${item('País', caso.pais)}
-${item('Comuna', caso.comuna)}
-`)}
-
-${section('Motivo y descripción', `
-${item('Motivo de consulta', caso.motivo_consulta)}
-${item('Descripción del problema', caso.descripcion_problema)}
-`, true)}
-
-${section('Conducta y contexto', `
-${item('Descripción de la conducta', caso.descripcion_conducta)}
-${item('Desde cuándo', caso.desde_cuando)}
-${item('Antecedente', caso.antecedente)}
-${item('Consecuencia', caso.consecuencia)}
-${item('Disparador', caso.disparador)}
-`, true)}
-
-${section('Frecuencia e intensidad', `
-${item('Frecuencia', caso.frecuencia)}
-${item('Frecuencia score', caso.frecuencia_score)}
-${item('Intensidad', caso.intensidad)}
-${item('Intensidad score', caso.intensidad_score)}
-`)}
-
-${section('Seguridad y salud', `
-${item('Mordida', caso.mordida)}
-${item('Intento de mordida', caso.intento_mordida)}
-${item('Riesgo actual', caso.riesgo_actual)}
-${item('Rompió piel', caso.rompio_piel)}
-${item('Atención médica/veterinaria', caso.atencion_medica)}
-${item('Problema médico', caso.problema_medico)}
-${item('Evaluación veterinaria', caso.evaluacion_veterinaria)}
-${item('Observaciones importantes', caso.observaciones_alerta)}
-`, true)}
-
-${section('Objetivo del tutor', `
-${item('Objetivo', caso.objetivo)}
-${item('Nivel de compromiso', caso.nivel_compromiso)}
-`, true)}
-</div>
-`;
-
-modalBackdrop.classList.add('active');
-};
-
-window.cerrarFicha = function(event) {
-if (event && event.target !== modalBackdrop) return;
-modalBackdrop.classList.remove('active');
-};
 
 window.eliminarCaso = async function(id) {
-if (!confirm('¿Eliminar este caso?')) return;
+  if (!confirm('¿Eliminar este caso?')) return;
 
-const { error } = await supabaseClient
-.from('casos')
-.delete()
-.eq('id', id);
+  const { error } = await supabaseClient
+    .from('casos')
+    .delete()
+    .eq('id', id);
 
-if (error) {
-console.error('Error al eliminar caso:', error);
-alert('No se pudo eliminar el caso.');
-return;
-}
+  if (error) {
+    console.error('Error al eliminar caso:', error);
+    alert('No se pudo eliminar el caso.');
+    return;
+  }
 
-await cargarCasos();
+  await cargarCasos();
 };
 
 cargarCasos();
