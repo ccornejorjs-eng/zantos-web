@@ -105,6 +105,35 @@ if (!data.observaciones_alerta) errors.push('Faltan observaciones importantes.')
 return errors;
 }
 
+document.querySelectorAll('.collapsible h2').forEach(header => {
+header.addEventListener('click', () => {
+const section = header.parentElement;
+section.classList.toggle('open');
+});
+});
+
+const progressFill = document.getElementById('progressFill');
+
+function calcularProgreso() {
+if (!progressFill) return;
+
+const inputs = form.querySelectorAll('input, select, textarea');
+let total = 0;
+let llenos = 0;
+
+inputs.forEach(i => {
+if (i.type === 'checkbox' || i.type === 'radio') return;
+total++;
+if (i.value && i.value.trim() !== '') llenos++;
+});
+
+const porcentaje = total ? Math.round((llenos / total) * 100) : 0;
+progressFill.style.width = porcentaje + '%';
+}
+
+form.addEventListener('input', calcularProgreso);
+form.addEventListener('change', calcularProgreso);
+
 form.addEventListener('submit', async (e) => {
 e.preventDefault();
 
@@ -131,4 +160,16 @@ form.reset();
 
 const firstPlan = form.querySelector('input[name="plan"]');
 if (firstPlan) firstPlan.checked = true;
+
+document.querySelectorAll('.collapsible').forEach((section, index) => {
+if (index === 0) {
+section.classList.add('open');
+} else {
+section.classList.remove('open');
+}
 });
+
+calcularProgreso();
+});
+
+calcularProgreso();
