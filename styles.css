@@ -1,175 +1,459 @@
-const form = document.getElementById('zantosForm');
-
-const supabaseUrl = 'https://wzsyybrqycqcmouhmlzy.supabase.co';
-const supabaseKey = 'sb_publishable_V5e8LxY7my69nDSOUYRGsA_UxvDzPrl';
-const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-function checkedValues(name) {
-return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(el => el.value);
+:root{
+--bg:#f5f6f8;
+--panel:#ffffff;
+--panel-soft:#fafbfc;
+--text:#16181d;
+--muted:#6b7280;
+--line:#e5e7eb;
+--line-strong:#d1d5db;
+--dark:#1f2937;
+--dark-2:#111827;
+--accent:#0f172a;
+--success:#0f766e;
+--radius:18px;
+--radius-sm:12px;
+--shadow:0 10px 30px rgba(15, 23, 42, 0.06);
 }
 
-function value(name) {
-const el = form.elements[name];
-return el ? String(el.value || '').trim() : '';
+*{
+box-sizing:border-box;
 }
 
-function mapFrecuencia(label) {
-return ({ 'Ocasional': 1, 'Frecuente': 2, 'Muy frecuente': 3, 'Siempre': 4 })[label] || 0;
+html,body{
+margin:0;
+padding:0;
+background:var(--bg);
+color:var(--text);
+font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-function mapIntensidad(label) {
-return ({ 'Leve': 1, 'Moderado': 2, 'Alto': 3, 'Muy alto': 4 })[label] || 0;
+body{
+line-height:1.45;
 }
 
-function buildCaseRow() {
-const conductas = checkedValues('conductas');
-const contextos = checkedValues('contextos');
-const planEl = form.querySelector('input[name="plan"]:checked');
-
-return {
-estado: 'nuevo',
-subestado: 'pendiente_revision',
-
-nombre_perro: value('nombre_perro'),
-edad: `${value('edad_anios')} años ${value('edad_meses')} meses`.trim(),
-raza: value('raza'),
-sexo: value('sexo'),
-esterilizado: value('esterilizado'),
-
-nombre_tutor: value('nombre_tutor'),
-telefono: value('telefono'),
-email: value('correo'),
-pais: value('pais'),
-comuna: value('comuna'),
-
-motivo_consulta: value('motivo_principal'),
-descripcion_problema: value('descripcion_motivo'),
-
-descripcion_conducta: value('descripcion_conducta'),
-desde_cuando: value('desde_cuando'),
-antecedente: value('antecedente'),
-consecuencia: value('consecuencia'),
-disparador: value('disparador'),
-
-frecuencia: value('frecuencia'),
-frecuencia_score: mapFrecuencia(value('frecuencia')),
-intensidad: value('intensidad'),
-intensidad_score: mapIntensidad(value('intensidad')),
-
-mordida: value('mordida'),
-intento_mordida: value('intento_mordida'),
-riesgo_actual: value('riesgo_actual'),
-rompio_piel: value('rompio_piel'),
-atencion_medica: value('atencion_medica'),
-problema_medico: value('problema_medico'),
-evaluacion_veterinaria: value('evaluacion_veterinaria'),
-observaciones_alerta: value('observaciones_alerta'),
-
-objetivo: value('objetivo'),
-nivel_compromiso: value('nivel_compromiso'),
-
-plan_sugerido: planEl ? planEl.value : 'Evaluación inicial',
-score_global: mapFrecuencia(value('frecuencia')) + mapIntensidad(value('intensidad')),
-
-conductas_json: JSON.stringify(conductas),
-contextos_json: JSON.stringify(contextos),
-region: value('region'),
-localidad: value('localidad'),
-problema_secundario: value('problema_secundario'),
-duracion: value('duracion'),
-tipo_vivienda: value('tipo_vivienda'),
-acceso_exterior: value('acceso_exterior'),
-convive_animales: value('convive_animales'),
-convive_ninos: value('convive_ninos'),
-nivel_actividad: value('nivel_actividad'),
-tiempo_solo: value('tiempo_solo'),
-tiempo_paseo: value('tiempo_paseo'),
-rutina_diaria: value('rutina_diaria'),
-inicio_problema: value('inicio_problema'),
-evolucion: value('evolucion'),
-edad_inicio: value('edad_inicio'),
-intervenciones_previas: value('intervenciones_previas'),
-evento_desencadenante: value('evento_desencadenante'),
-descripcion_intervenciones: value('descripcion_intervenciones')
-};
+.app-shell{
+max-width:1200px;
+margin:0 auto;
+padding:24px;
 }
 
-function validate(data) {
-const errors = [];
-if (!data.nombre_perro) errors.push('Falta el nombre del perro.');
-if (!data.nombre_tutor) errors.push('Falta el nombre del responsable.');
-if (!data.motivo_consulta) errors.push('Falta el motivo principal.');
-if (!data.frecuencia) errors.push('Falta la frecuencia.');
-if (!data.intensidad) errors.push('Falta la intensidad.');
-if (!data.observaciones_alerta) errors.push('Faltan observaciones importantes.');
-return errors;
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
+gap:20px;
+margin-bottom:28px;
+padding:18px 20px;
+background:var(--panel);
+border:1px solid var(--line);
+border-radius:20px;
+box-shadow:var(--shadow);
 }
 
-document.querySelectorAll('.collapsible h2').forEach(header => {
-header.addEventListener('click', () => {
-const section = header.parentElement;
-section.classList.toggle('open');
-});
-});
-
-const progressFill = document.getElementById('progressFill');
-
-function calcularProgreso() {
-if (!progressFill) return;
-
-const inputs = form.querySelectorAll('input, select, textarea');
-let total = 0;
-let llenos = 0;
-
-inputs.forEach(i => {
-if (i.type === 'checkbox' || i.type === 'radio') return;
-total++;
-if (i.value && i.value.trim() !== '') llenos++;
-});
-
-const porcentaje = total ? Math.round((llenos / total) * 100) : 0;
-progressFill.style.width = porcentaje + '%';
+.brand{
+font-size:1.4rem;
+font-weight:800;
+letter-spacing:.08em;
+color:var(--dark-2);
 }
 
-form.addEventListener('input', calcularProgreso);
-form.addEventListener('change', calcularProgreso);
-
-form.addEventListener('submit', async (e) => {
-e.preventDefault();
-
-const data = buildCaseRow();
-const errors = validate(data);
-
-if (errors.length) {
-alert('No se puede crear el caso todavía:\n\n' + errors.join('\n'));
-return;
+.subtitle{
+color:var(--muted);
+font-size:.95rem;
+margin-top:4px;
 }
 
-const { error } = await supabaseClient
-.from('casos')
-.insert([data]);
-
-if (error) {
-console.error('Error al guardar en Supabase:', error);
-alert('Hubo un error al guardar el caso en la base de datos.');
-return;
+.nav-links{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
 }
 
-alert('Caso creado correctamente y guardado en la base de datos.');
-form.reset();
-
-const firstPlan = form.querySelector('input[name="plan"]');
-if (firstPlan) firstPlan.checked = true;
-
-document.querySelectorAll('.collapsible').forEach((section, index) => {
-if (index === 0) {
-section.classList.add('open');
-} else {
-section.classList.remove('open');
+.nav-links a{
+text-decoration:none;
+color:var(--dark);
+background:var(--panel-soft);
+border:1px solid var(--line);
+padding:10px 14px;
+border-radius:999px;
+font-weight:600;
+transition:.2s ease;
 }
-});
 
-calcularProgreso();
-});
+.nav-links a:hover{
+background:#eef2f7;
+border-color:var(--line-strong);
+}
 
-calcularProgreso();
+main{
+display:block;
+}
+
+.card{
+background:var(--panel);
+border:1px solid var(--line);
+border-radius:var(--radius);
+box-shadow:var(--shadow);
+padding:22px;
+margin-bottom:18px;
+}
+
+.hero{
+padding:28px;
+background:linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+}
+
+.hero h1{
+margin:0 0 10px 0;
+font-size:2rem;
+line-height:1.1;
+color:var(--dark-2);
+}
+
+.hero p{
+margin:0;
+color:var(--muted);
+max-width:780px;
+}
+
+.section h2,
+.card h2{
+margin:0 0 16px 0;
+font-size:1.1rem;
+color:var(--dark-2);
+}
+
+.grid-2{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:14px;
+}
+
+.grid-3{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:14px;
+}
+
+.row{
+display:flex;
+gap:12px;
+}
+
+label{
+display:block;
+margin-bottom:14px;
+}
+
+label span{
+display:block;
+margin-bottom:8px;
+font-size:.92rem;
+font-weight:700;
+color:var(--dark);
+}
+
+input,
+select,
+textarea,
+button{
+width:100%;
+font:inherit;
+}
+
+input,
+select,
+textarea{
+background:#fff;
+border:1px solid var(--line);
+color:var(--text);
+border-radius:14px;
+padding:13px 14px;
+transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+input::placeholder,
+textarea::placeholder{
+color:#9ca3af;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+outline:none;
+border-color:#94a3b8;
+box-shadow:0 0 0 4px rgba(148,163,184,.15);
+}
+
+textarea{
+min-height:110px;
+resize:vertical;
+}
+
+.check-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:10px 14px;
+margin-bottom:14px;
+}
+
+.check-grid label{
+display:flex;
+align-items:center;
+gap:10px;
+margin:0;
+padding:10px 12px;
+background:var(--panel-soft);
+border:1px solid var(--line);
+border-radius:14px;
+font-weight:600;
+}
+
+.check-grid input{
+width:auto;
+}
+
+.plan-card{
+display:flex;
+flex-direction:column;
+gap:8px;
+background:var(--panel-soft);
+border:1px solid var(--line);
+border-radius:16px;
+padding:16px;
+cursor:pointer;
+transition:.2s ease;
+}
+
+.plan-card:hover{
+border-color:var(--line-strong);
+transform:translateY(-1px);
+}
+
+.plan-card input{
+width:auto;
+}
+
+.plan-card strong{
+color:var(--dark-2);
+font-size:1rem;
+}
+
+.plan-card span{
+color:var(--muted);
+font-size:.92rem;
+}
+
+.actions-card{
+position:sticky;
+bottom:10px;
+background:rgba(255,255,255,.92);
+backdrop-filter:blur(8px);
+}
+
+.small-note{
+color:var(--muted);
+font-size:.93rem;
+margin-bottom:12px;
+}
+
+.actions{
+justify-content:flex-end;
+align-items:center;
+}
+
+button{
+border:none;
+border-radius:14px;
+padding:13px 18px;
+cursor:pointer;
+font-weight:700;
+transition:.2s ease;
+}
+
+button:hover{
+transform:translateY(-1px);
+}
+
+button[type="submit"],
+button:not(.secondary):not(.close-btn){
+background:var(--accent);
+color:#fff;
+}
+
+button.secondary{
+background:#fff;
+color:var(--dark);
+border:1px solid var(--line);
+}
+
+button.secondary:hover{
+background:#f8fafc;
+}
+
+#estadoCarga p,
+.empty-note{
+color:var(--muted);
+}
+
+p{
+margin:0 0 10px 0;
+}
+
+strong{
+color:var(--dark-2);
+}
+
+.modal-backdrop{
+position:fixed;
+inset:0;
+background:rgba(15,23,42,.45);
+display:none;
+align-items:center;
+justify-content:center;
+padding:24px;
+z-index:999;
+}
+
+.modal-backdrop.active{
+display:flex;
+}
+
+.modal-card{
+width:min(1000px, 96vw);
+max-height:92vh;
+overflow:auto;
+background:#fff;
+border-radius:22px;
+box-shadow:0 20px 60px rgba(15,23,42,.22);
+padding:24px;
+}
+
+.modal-header{
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
+gap:16px;
+margin-bottom:18px;
+}
+
+.modal-title-wrap h2{
+margin:0 0 6px 0;
+font-size:1.5rem;
+}
+
+.modal-subtitle{
+color:var(--muted);
+font-size:.95rem;
+}
+
+.close-btn{
+width:auto;
+border:1px solid var(--line);
+background:#fff;
+border-radius:12px;
+padding:10px 14px;
+cursor:pointer;
+}
+
+.ficha-grid{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:16px;
+}
+
+.ficha-section{
+border:1px solid var(--line);
+border-radius:16px;
+padding:18px;
+background:var(--panel-soft);
+}
+
+.ficha-section.full{
+grid-column:1 / -1;
+}
+
+.ficha-section h3{
+margin:0 0 14px 0;
+font-size:1rem;
+color:var(--dark-2);
+}
+
+.ficha-list{
+display:grid;
+gap:10px;
+}
+
+.ficha-item{
+display:grid;
+grid-template-columns:180px 1fr;
+gap:10px;
+align-items:start;
+}
+
+.ficha-text{
+white-space:pre-wrap;
+word-break:break-word;
+color:#374151;
+}
+
+.section.collapsible h2{
+cursor:pointer;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.section.collapsible h2::after{
+content:"+";
+font-weight:bold;
+transition:.2s;
+}
+
+.section.collapsible.open h2::after{
+content:"–";
+}
+
+.section.collapsible .section-content{
+display:none;
+margin-top:10px;
+}
+
+.section.collapsible.open .section-content{
+display:block;
+}
+
+@media (max-width:900px){
+.grid-3{
+grid-template-columns:1fr;
+}
+
+.topbar{
+flex-direction:column;
+align-items:stretch;
+}
+}
+
+@media (max-width:760px){
+.app-shell{
+padding:16px;
+}
+
+.grid-2,
+.ficha-grid{
+grid-template-columns:1fr;
+}
+
+.row{
+flex-direction:column;
+}
+
+.ficha-item{
+grid-template-columns:1fr;
+gap:4px;
+}
+
+.hero h1{
+font-size:1.6rem;
+}
+}
