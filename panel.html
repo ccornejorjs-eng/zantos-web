@@ -5,12 +5,136 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ZANTOS · Panel de casos</title>
 <link rel="stylesheet" href="styles.css">
+<style>
+.modal-backdrop{
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,.45);
+display: none;
+align-items: center;
+justify-content: center;
+padding: 24px;
+z-index: 999;
+}
+.modal-backdrop.active{ display:flex; }
+
+.modal-card{
+width: min(1000px, 96vw);
+max-height: 92vh;
+overflow: auto;
+background: #fff;
+border-radius: 18px;
+box-shadow: 0 20px 60px rgba(0,0,0,.18);
+padding: 24px;
+}
+
+.modal-header{
+display:flex;
+justify-content: space-between;
+align-items: flex-start;
+gap: 16px;
+margin-bottom: 16px;
+}
+
+.modal-title-wrap h2{
+margin: 0 0 6px 0;
+}
+
+.modal-subtitle{
+color: #666;
+font-size: .95rem;
+}
+
+.close-btn{
+border: 1px solid #ddd;
+background: #fff;
+border-radius: 10px;
+padding: 10px 14px;
+cursor: pointer;
+}
+
+.ficha-grid{
+display:grid;
+grid-template-columns: repeat(2, minmax(0,1fr));
+gap: 16px;
+}
+
+.ficha-section{
+border: 1px solid #ececec;
+border-radius: 16px;
+padding: 16px;
+background: #fff;
+}
+
+.ficha-section.full{
+grid-column: 1 / -1;
+}
+
+.ficha-section h3{
+margin-top: 0;
+margin-bottom: 12px;
+font-size: 1rem;
+}
+
+.ficha-list{
+display:grid;
+gap: 8px;
+}
+
+.ficha-item{
+display:grid;
+grid-template-columns: 180px 1fr;
+gap: 10px;
+align-items: start;
+}
+
+.ficha-item strong{
+color: #222;
+}
+
+.ficha-text{
+white-space: pre-wrap;
+word-break: break-word;
+}
+
+.badge-row{
+display:flex;
+flex-wrap: wrap;
+gap: 8px;
+margin-top: 8px;
+}
+
+.badge{
+display:inline-block;
+padding: 6px 10px;
+border-radius: 999px;
+background: #f3f4f6;
+border: 1px solid #e5e7eb;
+font-size: .9rem;
+}
+
+.empty-note{
+color:#666;
+font-style: italic;
+}
+
+@media (max-width: 760px){
+.ficha-grid{ grid-template-columns: 1fr; }
+.ficha-item{ grid-template-columns: 1fr; gap: 4px; }
+}
+</style>
 </head>
 <body>
 <div class="app-shell">
 <header class="topbar">
-<div><div class="brand">ZANTOS</div><div class="subtitle">Panel profesional de casos</div></div>
-<nav class="nav-links"><a href="index.html">Formulario</a><a href="panel.html">Panel</a></nav>
+<div>
+<div class="brand">ZANTOS</div>
+<div class="subtitle">Panel profesional de casos</div>
+</div>
+<nav class="nav-links">
+<a href="index.html">Formulario</a>
+<a href="panel.html">Panel</a>
+</nav>
 </header>
 
 <main>
@@ -27,6 +151,19 @@
 </main>
 </div>
 
+<div id="modalBackdrop" class="modal-backdrop" onclick="cerrarFicha(event)">
+<div class="modal-card" onclick="event.stopPropagation()">
+<div class="modal-header">
+<div class="modal-title-wrap">
+<h2 id="fichaTitulo">Ficha del caso</h2>
+<div id="fichaSubtitulo" class="modal-subtitle"></div>
+</div>
+<button class="close-btn" onclick="cerrarFicha()">Cerrar</button>
+</div>
+<div id="fichaContenido"></div>
+</div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const supabaseUrl = 'https://wzsyybrqycqcmouhmlzy.supabase.co';
@@ -35,6 +172,10 @@ const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 const container = document.getElementById('casosContainer');
 const estadoCarga = document.getElementById('estadoCarga');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const fichaTitulo = document.getElementById('fichaTitulo');
+const fichaSubtitulo = document.getElementById('fichaSubtitulo');
+const fichaContenido = document.getElementById('fichaContenido');
 
 let cases = [];
 
@@ -43,37 +184,38 @@ if (valor === null || valor === undefined || valor === '') return fallback;
 return String(valor);
 }
 
-function obtenerNombrePerro(caso) {
-return caso?.nombre_perro || '-';
-}
-
-function obtenerTutor(caso) {
-return caso?.nombre_tutor || '-';
-}
-
-function obtenerMotivo(caso) {
-return caso?.motivo_consulta || '-';
-}
-
-function obtenerPlan(caso) {
-return caso?.plan_sugerido || '-';
-}
-
-function obtenerEstado(caso) {
-return caso?.estado || '-';
-}
-
-function obtenerSubestado(caso) {
-return caso?.subestado || '-';
-}
-
-function obtenerFecha(caso) {
-if (!caso?.fecha_creacion) return '-';
+function formatearFecha(valor) {
+if (!valor) return '-';
 try {
-return new Date(caso.fecha_creacion).toLocaleString();
+return new Date(valor).toLocaleString();
 } catch {
-return caso.fecha_creacion;
+return valor;
 }
+}
+
+function badgeList(items) {
+if (!Array.isArray(items) || !items.length) {
+return '<div class="empty-note">Sin información.</div>';
+}
+return `<div class="badge-row">${items.map(item => `<span class="badge">${textoSeguro(item)}</span>`).join('')}</div>`;
+}
+
+function item(label, value) {
+return `
+<div class="ficha-item">
+<strong>${label}</strong>
+<div class="ficha-text">${textoSeguro(value)}</div>
+</div>
+`;
+}
+
+function section(title, content, full = false) {
+return `
+<section class="ficha-section ${full ? 'full' : ''}">
+<h3>${title}</h3>
+<div class="ficha-list">${content}</div>
+</section>
+`;
 }
 
 function render() {
@@ -86,21 +228,21 @@ return;
 
 container.innerHTML = cases.map((caso, i) => `
 <section class="card">
-<h2>${textoSeguro(obtenerNombrePerro(caso))}</h2>
+<h2>${textoSeguro(caso.nombre_perro)}</h2>
 <div class="grid-2">
 <div>
-<p><strong>Tutor:</strong> ${textoSeguro(obtenerTutor(caso))}</p>
-<p><strong>Motivo principal:</strong> ${textoSeguro(obtenerMotivo(caso))}</p>
-<p><strong>Plan:</strong> ${textoSeguro(obtenerPlan(caso))}</p>
+<p><strong>Tutor:</strong> ${textoSeguro(caso.nombre_tutor)}</p>
+<p><strong>Motivo principal:</strong> ${textoSeguro(caso.motivo_consulta)}</p>
+<p><strong>Plan:</strong> ${textoSeguro(caso.plan_sugerido)}</p>
 </div>
 <div>
-<p><strong>Estado:</strong> ${textoSeguro(obtenerEstado(caso))}</p>
-<p><strong>Subestado:</strong> ${textoSeguro(obtenerSubestado(caso))}</p>
-<p><strong>Fecha:</strong> ${textoSeguro(obtenerFecha(caso))}</p>
+<p><strong>Estado:</strong> ${textoSeguro(caso.estado)}</p>
+<p><strong>Subestado:</strong> ${textoSeguro(caso.subestado)}</p>
+<p><strong>Fecha:</strong> ${textoSeguro(formatearFecha(caso.fecha_creacion))}</p>
 </div>
 </div>
 <div class="row actions">
-<button class="secondary" onclick="verCaso(${i})">Ver objeto</button>
+<button class="secondary" onclick="abrirFicha(${i})">Abrir ficha</button>
 <button onclick="eliminarCaso('${caso.id}')">Eliminar</button>
 </div>
 </section>
@@ -126,8 +268,85 @@ cases = data || [];
 render();
 }
 
-window.verCaso = function(i) {
-alert(JSON.stringify(cases[i], null, 2));
+window.abrirFicha = function(i) {
+const caso = cases[i];
+if (!caso) return;
+
+fichaTitulo.textContent = `Ficha · ${textoSeguro(caso.nombre_perro)}`;
+fichaSubtitulo.textContent = `Tutor: ${textoSeguro(caso.nombre_tutor)} · Estado: ${textoSeguro(caso.estado)} · Fecha: ${formatearFecha(caso.fecha_creacion)}`;
+
+fichaContenido.innerHTML = `
+<div class="ficha-grid">
+${section('Resumen del caso', `
+${item('Nombre del perro', caso.nombre_perro)}
+${item('Tutor', caso.nombre_tutor)}
+${item('Motivo principal', caso.motivo_consulta)}
+${item('Plan sugerido', caso.plan_sugerido)}
+${item('Estado', caso.estado)}
+${item('Subestado', caso.subestado)}
+${item('Fecha de creación', formatearFecha(caso.fecha_creacion))}
+${item('Score global', caso.score_global)}
+`)}
+
+${section('Datos del perro', `
+${item('Edad', caso.edad)}
+${item('Raza', caso.raza)}
+${item('Sexo', caso.sexo)}
+${item('Esterilizado', caso.esterilizado)}
+`)}
+
+${section('Datos del responsable', `
+${item('Nombre', caso.nombre_tutor)}
+${item('Teléfono', caso.telefono)}
+${item('Correo', caso.email)}
+${item('País', caso.pais)}
+${item('Comuna', caso.comuna)}
+`)}
+
+${section('Motivo y descripción', `
+${item('Motivo de consulta', caso.motivo_consulta)}
+${item('Descripción del problema', caso.descripcion_problema)}
+`, true)}
+
+${section('Conducta y contexto', `
+${item('Descripción de la conducta', caso.descripcion_conducta)}
+${item('Desde cuándo', caso.desde_cuando)}
+${item('Antecedente', caso.antecedente)}
+${item('Consecuencia', caso.consecuencia)}
+${item('Disparador', caso.disparador)}
+`, true)}
+
+${section('Frecuencia e intensidad', `
+${item('Frecuencia', caso.frecuencia)}
+${item('Frecuencia score', caso.frecuencia_score)}
+${item('Intensidad', caso.intensidad)}
+${item('Intensidad score', caso.intensidad_score)}
+`)}
+
+${section('Seguridad y salud', `
+${item('Mordida', caso.mordida)}
+${item('Intento de mordida', caso.intento_mordida)}
+${item('Riesgo actual', caso.riesgo_actual)}
+${item('Rompió piel', caso.rompio_piel)}
+${item('Atención médica/veterinaria', caso.atencion_medica)}
+${item('Problema médico', caso.problema_medico)}
+${item('Evaluación veterinaria', caso.evaluacion_veterinaria)}
+${item('Observaciones importantes', caso.observaciones_alerta)}
+`, true)}
+
+${section('Objetivo del tutor', `
+${item('Objetivo', caso.objetivo)}
+${item('Nivel de compromiso', caso.nivel_compromiso)}
+`, true)}
+</div>
+`;
+
+modalBackdrop.classList.add('active');
+};
+
+window.cerrarFicha = function(event) {
+if (event && event.target !== modalBackdrop) return;
+modalBackdrop.classList.remove('active');
 };
 
 window.eliminarCaso = async function(id) {
