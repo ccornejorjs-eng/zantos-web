@@ -3,162 +3,166 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZANTOS · Formulario inicial</title>
+<title>ZANTOS · Formulario</title>
 <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 <div class="app-shell">
+
 <header class="topbar">
-  <div><div class="brand">ZANTOS</div><div class="subtitle">Formulario de ingreso inicial del caso</div></div>
-  <nav class="nav-links"><a href="index.html">Formulario</a><a href="panel.html">Panel</a></nav>
+<div>
+<div class="brand">ZANTOS</div>
+<div class="subtitle">Formulario de ingreso inicial del caso</div>
+</div>
+
+<nav class="nav-links">
+<a href="index.html">Formulario</a>
+<a href="panel.html">Panel</a>
+</nav>
 </header>
 
-<main class="main-grid">
-<section class="left-col">
+<main>
+
 <section class="card hero">
 <h1>Evaluación inicial</h1>
 <p>Completa este formulario antes de iniciar el proceso. La información se transforma en un caso estructurado para ZANTOS.</p>
 </section>
 
-<form id="zantosForm" novalidate>
-<section class="card section"><h2>1. Datos del perro</h2>
-<div class="grid-2">
-<label><span>Nombre del perro *</span><input name="nombre_perro" required></label>
-<label><span>Edad *</span><div class="row"><input type="number" min="0" name="edad_anios" placeholder="Años" required><input type="number" min="0" max="11" name="edad_meses" placeholder="Meses"></div></label>
-<label><span>Rango de edad *</span><select name="rango_etario" required><option value="">Seleccionar</option><option>Cachorro</option><option>Joven</option><option>Adulto</option><option>Senior</option></select></label>
-<label><span>Raza o mestizo *</span><input name="raza" required></label>
-<label><span>Sexo *</span><select name="sexo" required><option value="">Seleccionar</option><option>Macho</option><option>Hembra</option></select></label>
-<label><span>¿Está esterilizado? *</span><select name="esterilizado" required><option value="">Seleccionar</option><option>Sí</option><option>No</option></select></label>
-</div></section>
+<form id="caseForm">
 
-<section class="card section"><h2>2. Datos del responsable</h2>
-<div class="grid-2">
-<label><span>Nombre *</span><input name="nombre_tutor" required></label>
-<label><span>Teléfono *</span><input name="telefono" required></label>
-<label><span>Correo *</span><input type="email" name="correo" required></label>
-<label><span>País *</span><input name="pais" required></label>
-<label><span>Región *</span><input name="region" required></label>
-<label><span>Comuna *</span><input name="comuna" required></label>
-<label><span>Sector / localidad</span><input name="localidad"></label>
-</div></section>
+<section class="card">
+<h2>1. Datos del perro</h2>
 
-<section class="card section"><h2>3. Motivo de consulta</h2>
+<label>Nombre del perro *</label>
+<input type="text" id="nombre_perro" required>
+
+<label>Edad *</label>
 <div class="grid-2">
-<label><span>Problema principal *</span><select name="motivo_principal" required>
-<option value="">Seleccionar</option><option>Ansiedad cuando se queda solo</option><option>Apego excesivo</option><option>Miedo</option><option>Fobia</option><option>Reacciona ante perros/personas</option><option>Agresividad</option><option>Protección de comida u objetos</option><option>Exceso de energía / hiperactividad</option><option>Otro</option>
-</select></label>
-<label><span>Problema adicional</span><input name="problema_secundario"></label>
+<input type="number" id="edad_anios" placeholder="Años">
+<input type="number" id="edad_meses" placeholder="Meses">
 </div>
-<label><span>Describe brevemente la situación *</span><textarea name="descripcion_motivo" required></textarea></label>
+
+<label>Raza o mestizo *</label>
+<input type="text" id="raza" required>
+
+<label>Sexo *</label>
+<select id="sexo" required>
+<option value="">Seleccionar</option>
+<option>Macho</option>
+<option>Hembra</option>
+</select>
+
+<label>¿Está esterilizado? *</label>
+<select id="esterilizado" required>
+<option value="">Seleccionar</option>
+<option>Sí</option>
+<option>No</option>
+</select>
 </section>
 
-<section class="card section"><h2>4. Conductas que presenta</h2>
-<div class="check-grid">
-<label><input type="checkbox" name="conductas" value="Ladra">Ladra</label>
-<label><input type="checkbox" name="conductas" value="Aúlla">Aúlla</label>
-<label><input type="checkbox" name="conductas" value="Gruñe">Gruñe</label>
-<label><input type="checkbox" name="conductas" value="Intenta morder">Intenta morder</label>
-<label><input type="checkbox" name="conductas" value="Muerde">Muerde</label>
-<label><input type="checkbox" name="conductas" value="Destruye objetos">Destruye objetos</label>
-<label><input type="checkbox" name="conductas" value="Se esconde">Se esconde</label>
-<label><input type="checkbox" name="conductas" value="Evita">Evita</label>
-<label><input type="checkbox" name="conductas" value="Tiembla">Tiembla</label>
-<label><input type="checkbox" name="conductas" value="Protege objetos o comida">Protege objetos o comida</label>
-<label><input type="checkbox" name="conductas" value="Persigue">Persigue</label>
-<label><input type="checkbox" name="conductas" value="Salta constantemente">Salta constantemente</label>
-<label><input type="checkbox" name="conductas" value="Está muy inquieto">Está muy inquieto</label>
-<label><input type="checkbox" name="conductas" value="Otro">Otro</label>
-</div>
-<label><span>Describe con tus palabras lo que ocurre *</span><textarea name="descripcion_conducta" required></textarea></label>
-<label><span>¿Desde cuándo ocurre este problema? *</span><input name="desde_cuando" required></label>
+<section class="card">
+<h2>2. Datos del responsable</h2>
+
+<label>Nombre *</label>
+<input type="text" id="nombre_tutor" required>
+
+<label>Teléfono *</label>
+<input type="text" id="telefono" required>
+
+<label>Correo *</label>
+<input type="email" id="email" required>
+
+<label>País *</label>
+<input type="text" id="pais" value="Chile">
+
+<label>Comuna *</label>
+<input type="text" id="comuna">
 </section>
 
-<section class="card section"><h2>5. En qué situaciones ocurre</h2>
-<div class="check-grid">
-<label><input type="checkbox" name="contextos" value="Cuando está solo">Cuando está solo</label>
-<label><input type="checkbox" name="contextos" value="Cuando estás presente">Cuando estás presente</label>
-<label><input type="checkbox" name="contextos" value="Con visitas">Con visitas</label>
-<label><input type="checkbox" name="contextos" value="Con otros perros">Con otros perros</label>
-<label><input type="checkbox" name="contextos" value="Con personas">Con personas</label>
-<label><input type="checkbox" name="contextos" value="Dentro de la casa">Dentro de la casa</label>
-<label><input type="checkbox" name="contextos" value="Fuera de la casa">Fuera de la casa</label>
-<label><input type="checkbox" name="contextos" value="Durante paseos">Durante paseos</label>
-<label><input type="checkbox" name="contextos" value="Cuando come">Cuando come</label>
-<label><input type="checkbox" name="contextos" value="Con juguetes">Con juguetes</label>
-<label><input type="checkbox" name="contextos" value="Cuando lo manipulan">Cuando lo manipulan</label>
-<label><input type="checkbox" name="contextos" value="Otro">Otro</label>
-</div>
-<label><span>¿Qué ocurre justo antes del problema? *</span><textarea name="antecedente" required></textarea></label>
-<label><span>¿Qué ocurre después del problema? *</span><textarea name="consecuencia" required></textarea></label>
-<label><span>¿Qué o quién provoca la reacción? *</span><input name="disparador" required></label>
+<section class="card">
+<h2>3. Evaluación conductual</h2>
+
+<label>Motivo de consulta *</label>
+<input type="text" id="motivo_consulta" required>
+
+<label>Descripción del problema</label>
+<textarea id="descripcion_problema"></textarea>
+
+<label>Frecuencia</label>
+<input type="text" id="frecuencia">
+
+<label>Intensidad</label>
+<input type="text" id="intensidad">
 </section>
 
-<section class="card section"><h2>6. Frecuencia e intensidad</h2>
-<div class="grid-2">
-<label><span>Frecuencia *</span><select name="frecuencia" required><option value="">Seleccionar</option><option>Ocasional</option><option>Frecuente</option><option>Muy frecuente</option><option>Siempre</option></select></label>
-<label><span>Intensidad *</span><select name="intensidad" required><option value="">Seleccionar</option><option>Leve</option><option>Moderado</option><option>Alto</option><option>Muy alto</option></select></label>
-<label><span>¿Cuánto dura normalmente?</span><input name="duracion"></label>
-</div></section>
+<section class="card">
+<h2>4. Gestión del caso</h2>
 
-<section class="card section"><h2>7. Entorno y rutina</h2>
-<div class="grid-2">
-<label><span>Tipo de vivienda *</span><select name="tipo_vivienda" required><option value="">Seleccionar</option><option>Casa</option><option>Departamento</option></select></label>
-<label><span>¿Tiene acceso al exterior? *</span><select name="acceso_exterior" required><option value="">Seleccionar</option><option>Sí</option><option>No</option></select></label>
-<label><span>¿Vive con otros animales? *</span><select name="convive_animales" required><option value="">Seleccionar</option><option>Sí</option><option>No</option></select></label>
-<label><span>¿Vive con niños? *</span><select name="convive_ninos" required><option value="">Seleccionar</option><option>Sí</option><option>No</option></select></label>
-<label><span>Nivel de actividad diaria *</span><select name="nivel_actividad" required><option value="">Seleccionar</option><option>Bajo</option><option>Medio</option><option>Alto</option></select></label>
-<label><span>¿Cuánto tiempo pasa solo al día? *</span><input name="tiempo_solo" required></label>
-<label><span>¿Cuánto tiempo de paseo diario tiene?</span><input name="tiempo_paseo"></label>
-</div>
-<label><span>Describe su rutina diaria *</span><textarea name="rutina_diaria" required></textarea></label>
+<label>Estado</label>
+<input type="text" id="estado" value="nuevo">
+
+<label>Subestado</label>
+<input type="text" id="subestado" value="pendiente_revision">
+
+<label>Plan sugerido</label>
+<input type="text" id="plan_sugerido">
 </section>
 
-<section class="card section"><h2>8. Historia del problema</h2>
-<div class="grid-2">
-<label><span>¿Desde cuándo ocurre? *</span><select name="inicio_problema" required><option value="">Seleccionar</option><option>Desde siempre</option><option>Apareció hace poco</option><option>Comenzó después de un evento específico</option></select></label>
-<label><span>¿Ha cambiado con el tiempo? *</span><select name="evolucion" required><option value="">Seleccionar</option><option>Ha mejorado</option><option>Ha empeorado</option><option>Se mantiene igual</option></select></label>
-<label><span>Edad aproximada de inicio</span><input name="edad_inicio"></label>
-<label><span>¿Has intentado solucionarlo antes? *</span><select name="intervenciones_previas" required><option value="">Seleccionar</option><option>Sí</option><option>No</option></select></label>
-</div>
-<label><span>¿Hubo algún evento que lo haya provocado?</span><textarea name="evento_desencadenante"></textarea></label>
-<label><span>Si sí, ¿qué hiciste?</span><textarea name="descripcion_intervenciones"></textarea></label>
+<section class="card">
+<button type="submit">Guardar caso</button>
 </section>
 
-<section class="card section"><h2>9. Seguridad y salud</h2>
-<div class="grid-2">
-<label><span>¿El perro ha mordido? *</span><select name="mordida" required><option value="">Seleccionar</option><option>Sí</option><option>No</option></select></label>
-<label><span>¿Ha intentado morder? *</span><select name="intento_mordida" required><option value="">Seleccionar</option><option>Sí</option><option>No</option></select></label>
-<label><span>¿Existe riesgo actual para personas o animales? *</span><select name="riesgo_actual" required><option value="">Seleccionar</option><option>Sí</option><option>No</option></select></label>
-<label><span>¿Ha causado heridas (rompió piel)? *</span><select name="rompio_piel" required><option value="">Seleccionar</option><option>Sí</option><option>No</option></select></label>
-<label><span>¿Ha requerido atención médica o veterinaria por esto? *</span><select name="atencion_medica" required><option value="">Seleccionar</option><option>Sí</option><option>No</option></select></label>
-<label><span>¿Tiene algún problema de salud? *</span><select name="problema_medico" required><option value="">Seleccionar</option><option>Sí</option><option>No</option></select></label>
-<label><span>¿Ha sido evaluado por un veterinario? *</span><select name="evaluacion_veterinaria" required><option value="">Seleccionar</option><option>Sí</option><option>No</option></select></label>
-</div>
-<label><span>Observaciones importantes *</span><textarea name="observaciones_alerta" required></textarea></label>
-</section>
-
-<section class="card section"><h2>10. Objetivo</h2>
-<label><span>¿Qué te gustaría lograr con este proceso? *</span><textarea name="objetivo" required></textarea></label>
-<label><span>Nivel de compromiso que puedes asumir *</span><select name="nivel_compromiso" required><option value="">Seleccionar</option><option>Bajo</option><option>Medio</option><option>Alto</option></select></label>
-</section>
-
-<section class="card section"><h2>11. Plan de ingreso</h2>
-<div class="grid-3">
-<label class="plan-card"><input type="radio" name="plan" value="Evaluación inicial" checked><strong>Evaluación inicial</strong><span>Ingreso del caso y primera revisión</span></label>
-<label class="plan-card"><input type="radio" name="plan" value="Intervención estándar"><strong>Intervención estándar</strong><span>Proceso conductual estructurado</span></label>
-<label class="plan-card"><input type="radio" name="plan" value="Seguimiento intensivo"><strong>Seguimiento intensivo</strong><span>Mayor continuidad y revisión</span></label>
-</div></section>
-
-<div class="card actions-card">
-<div class="small-note">Si completas el formulario correctamente, se creará un caso real con estado nuevo y pendiente de revisión.</div>
-<div class="row actions"><button type="button" id="previewBtn" class="secondary">Previsualizar salida</button><button type="submit">Crear caso</button></div>
-</div>
 </form>
-</section>
 
 </main>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js"></script>
+
+<script>
+supabaseUrl = 'https://wzsyybrqycqcmouhmlzy.supabase.co';
+const supabaseKey = 'sb_publishable_V5e8LxY7my69nDSOUYRGsA_UxvDzPrl';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+document.getElementById('caseForm').addEventListener('submit', async (e) => {
+e.preventDefault();
+
+const data = {
+nombre_perro: document.getElementById('nombre_perro').value,
+edad: document.getElementById('edad_anios').value,
+raza: document.getElementById('raza').value,
+sexo: document.getElementById('sexo').value,
+esterilizado: document.getElementById('esterilizado').value,
+
+nombre_tutor: document.getElementById('nombre_tutor').value,
+telefono: document.getElementById('telefono').value,
+email: document.getElementById('email').value,
+pais: document.getElementById('pais').value,
+comuna: document.getElementById('comuna').value,
+
+motivo_consulta: document.getElementById('motivo_consulta').value,
+descripcion_problema: document.getElementById('descripcion_problema').value,
+frecuencia: document.getElementById('frecuencia').value,
+intensidad: document.getElementById('intensidad').value,
+
+estado: document.getElementById('estado').value,
+subestado: document.getElementById('subestado').value,
+plan_sugerido: document.getElementById('plan_sugerido').value
+};
+
+const { error } = await supabase.from('casos').insert([data]);
+
+if (error) {
+alert('Error al guardar el caso');
+console.error(error);
+return;
+}
+
+alert('Caso guardado correctamente');
+document.getElementById('caseForm').reset();
+});
+</script>
+
 </body>
 </html>
