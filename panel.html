@@ -44,8 +44,7 @@ const estadoCarga = document.getElementById('estadoCarga');
 
 let cases = [];
 
-function textoSeguro(valor, fallback) {
-if (fallback === undefined) fallback = '-';
+function textoSeguro(valor, fallback = '-') {
 if (valor === null || valor === undefined || valor === '') return fallback;
 return String(valor);
 }
@@ -64,12 +63,6 @@ if (estado === 'nuevo') return 'badge badge-blue';
 if (estado === 'en_proceso') return 'badge badge-yellow';
 if (estado === 'cerrado') return 'badge badge-green';
 return 'badge';
-}
-
-function crearParrafo(html) {
-const p = document.createElement('p');
-p.innerHTML = html;
-return p;
 }
 
 function render() {
@@ -109,8 +102,8 @@ const grid = document.createElement('div');
 grid.className = 'grid-2';
 
 const left = document.createElement('div');
-left.appendChild(crearParrafo('<strong>Tutor:</strong> ' + textoSeguro(caso.nombre_tutor)));
-left.appendChild(crearParrafo('<strong>Plan:</strong> ' + textoSeguro(caso.plan_sugerido)));
+left.appendChild(parrafoHTML('<strong>Tutor:</strong> ' + textoSeguro(caso.nombre_tutor)));
+left.appendChild(parrafoHTML('<strong>Plan:</strong> ' + textoSeguro(caso.plan_sugerido)));
 
 const right = document.createElement('div');
 
@@ -122,8 +115,8 @@ badge.textContent = textoSeguro(caso.estado);
 estadoP.appendChild(badge);
 
 right.appendChild(estadoP);
-right.appendChild(crearParrafo('<strong>Subestado:</strong> ' + textoSeguro(caso.subestado)));
-right.appendChild(crearParrafo('<strong>Fecha:</strong> ' + textoSeguro(obtenerFecha(caso))));
+right.appendChild(parrafoHTML('<strong>Subestado:</strong> ' + textoSeguro(caso.subestado)));
+right.appendChild(parrafoHTML('<strong>Fecha:</strong> ' + textoSeguro(obtenerFecha(caso))));
 
 grid.appendChild(left);
 grid.appendChild(right);
@@ -151,6 +144,12 @@ card.appendChild(actions);
 
 container.appendChild(card);
 }
+}
+
+function parrafoHTML(html) {
+const p = document.createElement('p');
+p.innerHTML = html;
+return p;
 }
 
 async function cargarCasos() {
