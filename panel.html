@@ -9,51 +9,145 @@
 <body>
 <div class="app-shell">
 <header class="topbar">
-  <div><div class="brand">ZANTOS</div><div class="subtitle">Panel profesional de casos</div></div>
-  <nav class="nav-links"><a href="index.html">Formulario</a><a href="panel.html">Panel</a></nav>
+<div><div class="brand">ZANTOS</div><div class="subtitle">Panel profesional de casos</div></div>
+<nav class="nav-links"><a href="index.html">Formulario</a><a href="panel.html">Panel</a></nav>
 </header>
+
 <main>
-  <section class="card hero"><h1>Casos recibidos</h1><p>Este panel muestra los casos creados desde el formulario web y guardados en el navegador.</p></section>
-  <section id="casosContainer"></section>
+<section class="card hero">
+<h1>Casos recibidos</h1>
+<p>Este panel muestra los casos creados desde el formulario web y guardados en Supabase.</p>
+</section>
+
+<section id="estadoCarga" class="card">
+<p>Cargando casos...</p>
+</section>
+
+<section id="casosContainer"></section>
 </main>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const supabaseUrl = 'https://wzsyybrqycqcmouhmlzy.supabase.co';
+const supabaseKey = 'sb_publishable_V5e8LxY7my69nDSOUYRGsA_UxvDzPrl';
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
 const container = document.getElementById('casosContainer');
-let cases = JSON.parse(localStorage.getItem('ZANTOS_WEB_CASES') || '[]');
-function render(){
-  if(!cases.length){
-    container.innerHTML = '<section class="card"><p>No hay casos aún.</p></section>';
-    return;
-  }
-  container.innerHTML = cases.map((caso, i) => `
-    <section class="card">
-      <h2>${caso.identificacion.perro}</h2>
-      <div class="grid-2">
-        <div>
-          <p><strong>Tutor:</strong> ${caso.tutor.nombre_tutor}</p>
-          <p><strong>Motivo principal:</strong> ${caso.evaluacion.motivoConsulta}</p>
-          <p><strong>Plan:</strong> ${caso.planContratado}</p>
-        </div>
-        <div>
-          <p><strong>Estado:</strong> ${caso.metadata.estadoCaso}</p>
-          <p><strong>Subestado:</strong> ${caso.metadata.subestado}</p>
-          <p><strong>Fecha:</strong> ${new Date(caso.fecha).toLocaleString()}</p>
-        </div>
-      </div>
-      <div class="row actions">
-        <button class="secondary" onclick="verCaso(${i})">Ver objeto</button>
-        <button onclick="eliminarCaso(${i})">Eliminar</button>
-      </div>
-    </section>`).join('');
+const estadoCarga = document.getElementById('estadoCarga');
+
+let cases = [];
+
+function textoSeguro(valor, fallback = '-') {
+if (valor === null || valor === undefined || valor === '') return fallback;
+return String(valor);
 }
-function verCaso(i){ alert(JSON.stringify(cases[i], null, 2)); }
-function eliminarCaso(i){
-  if(!confirm('¿Eliminar este caso?')) return;
-  cases.splice(i,1);
-  localStorage.setItem('ZANTOS_WEB_CASES', JSON.stringify(cases));
-  render();
+
+function obtenerNombrePerro(caso) {
+return caso?.nombre_perro || '-';
 }
+
+function obtenerTutor(caso) {
+return caso?.nombre_tutor || '-';
+}
+
+function obtenerMotivo(caso) {
+return caso?.motivo_consulta || '-';
+}
+
+function obtenerPlan(caso) {
+return caso?.plan_sugerido || '-';
+}
+
+function obtenerEstado(caso) {
+return caso?.estado || '-';
+}
+
+function obtenerSubestado(caso) {
+return caso?.subestado || '-';
+}
+
+function obtenerFecha(caso) {
+if (!caso?.fecha_creacion) return '-';
+try {
+return new Date(caso.fecha_creacion).toLocaleString();
+} catch {
+return caso.fecha_creacion;
+}
+}
+
+function render() {
+estadoCarga.style.display = 'none';
+
+if (!cases.length) {
+container.innerHTML = '<section class="card"><p>No hay casos aún.</p></section>';
+return;
+}
+
+container.innerHTML = cases.map((caso, i) => `
+<section class="card">
+<h2>${textoSeguro(obtenerNombrePerro(caso))}</h2>
+<div class="grid-2">
+<div>
+<p><strong>Tutor:</strong> ${textoSeguro(obtenerTutor(caso))}</p>
+<p><strong>Motivo principal:</strong> ${textoSeguro(obtenerMotivo(caso))}</p>
+<p><strong>Plan:</strong> ${textoSeguro(obtenerPlan(caso))}</p>
+</div>
+<div>
+<p><strong>Estado:</strong> ${textoSeguro(obtenerEstado(caso))}</p>
+<p><strong>Subestado:</strong> ${textoSeguro(obtenerSubestado(caso))}</p>
+<p><strong>Fecha:</strong> ${textoSeguro(obtenerFecha(caso))}</p>
+</div>
+</div>
+<div class="row actions">
+<button class="secondary" onclick="verCaso(${i})">Ver objeto</button>
+<button onclick="eliminarCaso('${caso.id}')">Eliminar</button>
+</div>
+</section>
+`).join('');
+}
+
+async function cargarCasos() {
+estadoCarga.innerHTML = '<p>Cargando casos...</p>';
+
+const { data, error } = await supabaseClient
+.from('casos')
+.select('*')
+.order('fecha_creacion', { ascending: false });
+
+if (error) {
+console.error('Error al cargar casos:', error);
+estadoCarga.innerHTML = '<p>Error al cargar casos desde Supabase.</p>';
+container.innerHTML = '';
+return;
+}
+
+cases = data || [];
 render();
+}
+
+window.verCaso = function(i) {
+alert(JSON.stringify(cases[i], null, 2));
+};
+
+window.eliminarCaso = async function(id) {
+if (!confirm('¿Eliminar este caso?')) return;
+
+const { error } = await supabaseClient
+.from('casos')
+.delete()
+.eq('id', id);
+
+if (error) {
+console.error('Error al eliminar caso:', error);
+alert('No se pudo eliminar el caso.');
+return;
+}
+
+await cargarCasos();
+};
+
+cargarCasos();
 </script>
 </body>
 </html>
