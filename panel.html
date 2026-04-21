@@ -246,12 +246,10 @@ render();
 }
 
 window.abrirFicha = function(i) {
-const caso = cases[i];
-if (!caso) return;
-
-fichaTitulo.textContent = `Ficha · ${textoSeguro(caso.nombre_perro)}`;
-fichaSubtitulo.textContent = `Tutor: ${textoSeguro(caso.nombre_tutor)} · Estado: ${textoSeguro(caso.estado)} · Fecha: ${formatearFecha(caso.fecha_creacion)}`;
-
+  const caso = cases[i];
+  if (!caso) return;
+  window.location.href = ficha.html?id=${caso.id};
+};
 fichaContenido.innerHTML = `
 <div class="ficha-grid">
 ${section('Resumen del caso', `
