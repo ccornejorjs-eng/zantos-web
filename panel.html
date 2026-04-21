@@ -196,6 +196,7 @@ return `
 }
 
 function render() {
+console.log('render ejecutado', cases);
 estadoCarga.style.display = 'none';
 
 if (!cases.length) {
@@ -233,7 +234,7 @@ const { data, error } = await supabaseClient
 .from('casos')
 .select('*')
 .order('fecha_creacion', { ascending: false });
-
+console.log('respuesta supabase', { data, error });
 if (error) {
 console.error('Error al cargar casos:', error);
 estadoCarga.innerHTML = '<p>Error al cargar casos desde Supabase.</p>';
