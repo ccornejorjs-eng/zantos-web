@@ -457,3 +457,44 @@ gap:4px;
 font-size:1.6rem;
 }
 }
+.button-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  font-weight:700;
+  border-radius:14px;
+  padding:13px 18px;
+}
+
+.secondary-link{
+  background:#fff;
+  color:#1f2937;
+  border:1px solid #e5e7eb;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:.85rem;
+  font-weight:700;
+  background:#f3f4f6;
+  color:#374151;
+}
+
+.badge-blue{
+  background:#dbeafe;
+  color:#1e3a8a;
+}
+
+.badge-yellow{
+  background:#fef3c7;
+  color:#92400e;
+}
+
+.badge-green{
+  background:#dcfce7;
+  color:#166534;
+}
