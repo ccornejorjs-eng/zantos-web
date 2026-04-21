@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
 <div class="app-shell">
   <header class="topbar">
     <div>
@@ -22,7 +23,7 @@
   <main>
     <section class="card hero">
       <h1>Casos recibidos</h1>
-      <p>Este panel muestra los casos creados desde el formulario web y guardados en Supabase.</p>
+      <p>Casos creados desde el formulario y guardados en Supabase.</p>
     </section>
 
     <section id="estadoCarga" class="card">
@@ -34,6 +35,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 const supabaseUrl = 'https://wzsyybrqycqcmouhmlzy.supabase.co';
 const supabaseKey = 'sb_publishable_V5e8LxY7my69nDSOUYRGsA_UxvDzPrl';
@@ -43,27 +45,6 @@ const container = document.getElementById('casosContainer');
 const estadoCarga = document.getElementById('estadoCarga');
 
 let cases = [];
-
-function textoSeguro(valor, fallback = '-') {
-  if (valor === null || valor === undefined || valor === '') return fallback;
-  return String(valor);
-}
-
-function obtenerFecha(caso) {
-  if (!caso || !caso.fecha_creacion) return '-';
-  try {
-    return new Date(caso.fecha_creacion).toLocaleString();
-  } catch {
-    return caso.fecha_creacion;
-  }
-}
-
-function estadoBadge(estado) {
-  if (estado === 'nuevo') return 'badge badge-blue';
-  if (estado === 'en_proceso') return 'badge badge-yellow';
-  if (estado === 'cerrado') return 'badge badge-green';
-  return 'badge';
-}
 
 function render() {
   estadoCarga.style.display = 'none';
@@ -75,26 +56,19 @@ function render() {
 
   container.innerHTML = cases.map((caso, i) => `
     <section class="card">
-      <h2>${textoSeguro(caso.nombre_perro)}</h2>
+      <h2>${caso.nombre_perro || '-'}</h2>
 
-      <p style="font-size:18px;font-weight:600;margin:6px 0 14px 0;">
-        ${textoSeguro(caso.motivo_consulta)}
+      <p style="font-size:18px;font-weight:600;">
+        ${caso.motivo_consulta || '-'}
       </p>
 
-      <div class="grid-2">
-        <div>
-          <p><strong>Tutor:</strong> ${textoSeguro(caso.nombre_tutor)}</p>
-          <p><strong>Plan:</strong> ${textoSeguro(caso.plan_sugerido)}</p>
-        </div>
-        <div>
-          <p><strong>Estado:</strong> <span class="${estadoBadge(caso.estado)}">${textoSeguro(caso.estado)}</span></p>
-          <p><strong>Subestado:</strong> ${textoSeguro(caso.subestado)}</p>
-          <p><strong>Fecha:</strong> ${textoSeguro(obtenerFecha(caso))}</p>
-        </div>
-      </div>
+      <p><strong>Tutor:</strong> ${caso.nombre_tutor || '-'}</p>
+      <p><strong>Plan:</strong> ${caso.plan_sugerido || '-'}</p>
+      <p><strong>Estado:</strong> ${caso.estado || '-'}</p>
+      <p><strong>Fecha:</strong> ${new Date(caso.fecha_creacion).toLocaleString()}</p>
 
       <div class="row actions">
-        <button class="secondary" onclick="abrirFicha(${i})">Abrir ficha</button>
+        <button onclick="abrirFicha(${i})">Abrir ficha</button>
         <button onclick="eliminarCaso('${caso.id}')">Eliminar</button>
       </div>
     </section>
@@ -102,17 +76,14 @@ function render() {
 }
 
 async function cargarCasos() {
-  estadoCarga.innerHTML = '<p>Cargando casos...</p>';
-
   const { data, error } = await supabaseClient
     .from('casos')
     .select('*')
     .order('fecha_creacion', { ascending: false });
 
   if (error) {
-    console.error('Error al cargar casos:', error);
-    estadoCarga.innerHTML = '<p>Error al cargar casos desde Supabase.</p>';
-    container.innerHTML = '';
+    console.error(error);
+    estadoCarga.innerHTML = '<p>Error al cargar casos</p>';
     return;
   }
 
@@ -127,7 +98,7 @@ window.abrirFicha = function(i) {
 };
 
 window.eliminarCaso = async function(id) {
-  if (!confirm('¿Eliminar este caso?')) return;
+  if (!confirm('¿Eliminar caso?')) return;
 
   const { error } = await supabaseClient
     .from('casos')
@@ -135,15 +106,15 @@ window.eliminarCaso = async function(id) {
     .eq('id', id);
 
   if (error) {
-    console.error('Error al eliminar caso:', error);
-    alert('No se pudo eliminar el caso.');
+    alert('Error al eliminar');
     return;
   }
 
-  await cargarCasos();
+  cargarCasos();
 };
 
 cargarCasos();
 </script>
+
 </body>
 </html>
