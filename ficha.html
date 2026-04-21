@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZANTOS · Ficha del caso</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app-shell">
+<header class="topbar">
+<div>
+<div class="brand">ZANTOS</div>
+<div class="subtitle">Ficha profesional del caso</div>
+</div>
+<nav class="nav-links">
+<a href="index.html">Formulario</a>
+<a href="panel.html">Panel</a>
+</nav>
+</header>
+
+<main>
+<section class="card hero">
+<h1 id="tituloCaso">Ficha del caso</h1>
+<p id="subtituloCaso">Cargando información...</p>
+</section>
+
+<section id="estadoCarga" class="card">
+<p>Cargando caso...</p>
+</section>
+
+<section id="fichaContainer" style="display:none;">
+<div class="ficha-grid">
+
+<section class="ficha-section">
+<h3>Resumen del caso</h3>
+<div class="ficha-list" id="bloqueResumen"></div>
+</section>
+
+<section class="ficha-section">
+<h3>Datos del perro</h3>
+<div class="ficha-list" id="bloquePerro"></div>
+</section>
+
+<section class="ficha-section">
+<h3>Datos del responsable</h3>
+<div class="ficha-list" id="bloqueTutor"></div>
+</section>
+
+<section class="ficha-section full">
+<h3>Motivo y descripción</h3>
+<div class="ficha-list" id="bloqueMotivo"></div>
+</section>
+
+<section class="ficha-section full">
+<h3>Conducta y contexto</h3>
+<div class="ficha-list" id="bloqueConducta"></div>
+</section>
+
+<section class="ficha-section">
+<h3>Frecuencia e intensidad</h3>
+<div class="ficha-list" id="bloqueFrecuencia"></div>
+</section>
+
+<section class="ficha-section">
+<h3>Entorno</h3>
+<div class="ficha-list" id="bloqueEntorno"></div>
+</section>
+
+<section class="ficha-section full">
+<h3>Historia del problema</h3>
+<div class="ficha-list" id="bloqueHistoria"></div>
+</section>
+
+<section class="ficha-section full">
+<h3>Seguridad y salud</h3>
+<div class="ficha-list" id="bloqueSeguridad"></div>
+</section>
+
+<section class="ficha-section full">
+<h3>Objetivo del tutor</h3>
+<div class="ficha-list" id="bloqueObjetivo"></div>
+</section>
+
+</div>
+
+<section class="card actions-card" style="margin-top:18px;">
+<div class="row actions">
+<a href="panel.html" class="button-link secondary-link">Volver al panel</a>
+</div>
+</section>
+</section>
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseUrl = 'https://wzsyybrqycqcmouhmlzy.supabase.co';
+const supabaseKey = 'sb_publishable_V5e8LxY7my69nDSOUYRGsA_UxvDzPrl';
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+const estadoCarga = document.getElementById('estadoCarga');
+const fichaContainer = document.getElementById('fichaContainer');
+const tituloCaso = document.getElementById('tituloCaso');
+const subtituloCaso = document.getElementById('subtituloCaso');
+
+function qs(name){
+return new URLSearchParams(window.location.search).get(name);
+}
+
+function textoSeguro(valor, fallback = '-') {
+if (valor === null || valor === undefined || valor === '') return fallback;
+return String(valor);
+}
+
+function formatearFecha(valor) {
+if (!valor) return '-';
+try {
+return new Date(valor).toLocaleString();
+} catch {
+return valor;
+}
+}
+
+function estadoColor(estado){
+if (estado === 'nuevo') return 'badge badge-blue';
+if (estado === 'en_proceso') return 'badge badge-yellow';
+if (estado === 'cerrado') return 'badge badge-green';
+return 'badge';
+}
+
+function item(label, value, useBadge = false, badgeClass = '') {
+if (useBadge) {
+return `
+<div class="ficha-item">
+<strong>${label}</strong>
+<div class="ficha-text"><span class="${badgeClass}">${textoSeguro(value)}</span></div>
+</div>
+`;
+}
+
+return `
+<div class="ficha-item">
+<strong>${label}</strong>
+<div class="ficha-text">${textoSeguro(value)}</div>
+</div>
+`;
+}
+
+async function cargarCaso() {
+const id = qs('id');
+
+if (!id) {
+estadoCarga.innerHTML = '<p>No se indicó un caso válido.</p>';
+return;
+}
+
+const { data, error } = await supabaseClient
+.from('casos')
+.select('*')
+.eq('id', id)
+.single();
+
+if (error || !data) {
+console.error('Error al cargar caso:', error);
+estadoCarga.innerHTML = '<p>No se pudo cargar la ficha del caso.</p>';
+return;
+}
+
+tituloCaso.textContent = textoSeguro(data.nombre_perro, 'Ficha del caso');
+subtituloCaso.textContent = `Tutor: ${textoSeguro(data.nombre_tutor)} · Motivo: ${textoSeguro(data.motivo_consulta)} · Fecha: ${formatearFecha(data.fecha_creacion)}`;
+
+document.getElementById('bloqueResumen').innerHTML = `
+${item('Nombre del perro', data.nombre_perro)}
+${item('Motivo principal', data.motivo_consulta)}
+${item('Plan sugerido', data.plan_sugerido)}
+${item('Estado', data.estado, true, estadoColor(data.estado))}
+${item('Subestado', data.subestado)}
+${item('Fecha de creación', formatearFecha(data.fecha_creacion))}
+${item('Score global', data.score_global)}
+`;
+
+document.getElementById('bloquePerro').innerHTML = `
+${item('Edad', data.edad)}
+${item('Raza', data.raza)}
+${item('Sexo', data.sexo)}
+${item('Esterilizado', data.esterilizado)}
+`;
+
+document.getElementById('bloqueTutor').innerHTML = `
+${item('Nombre', data.nombre_tutor)}
+${item('Teléfono', data.telefono)}
+${item('Correo', data.email)}
+${item('País', data.pais)}
+${item('Región', data.region)}
+${item('Comuna', data.comuna)}
+${item('Localidad', data.localidad)}
+`;
+
+document.getElementById('bloqueMotivo').innerHTML = `
+${item('Motivo de consulta', data.motivo_consulta)}
+${item('Problema secundario', data.problema_secundario)}
+${item('Descripción del problema', data.descripcion_problema)}
+`;
+
+document.getElementById('bloqueConducta').innerHTML = `
+${item('Descripción de la conducta', data.descripcion_conducta)}
+${item('Desde cuándo', data.desde_cuando)}
+${item('Antecedente', data.antecedente)}
+${item('Consecuencia', data.consecuencia)}
+${item('Disparador', data.disparador)}
+${item('Conductas observadas', data.conductas_json)}
+${item('Contextos', data.contextos_json)}
+`;
+
+document.getElementById('bloqueFrecuencia').innerHTML = `
+${item('Frecuencia', data.frecuencia)}
+${item('Frecuencia score', data.frecuencia_score)}
+${item('Intensidad', data.intensidad)}
+${item('Intensidad score', data.intensidad_score)}
+${item('Duración', data.duracion)}
+`;
+
+document.getElementById('bloqueEntorno').innerHTML = `
+${item('Tipo de vivienda', data.tipo_vivienda)}
+${item('Acceso exterior', data.acceso_exterior)}
+${item('Convive con animales', data.convive_animales)}
+${item('Convive con niños', data.convive_ninos)}
+${item('Nivel de actividad', data.nivel_actividad)}
+${item('Tiempo solo', data.tiempo_solo)}
+${item('Tiempo de paseo', data.tiempo_paseo)}
+${item('Rutina diaria', data.rutina_diaria)}
+`;
+
+document.getElementById('bloqueHistoria').innerHTML = `
+${item('Inicio del problema', data.inicio_problema)}
+${item('Evolución', data.evolucion)}
+${item('Edad de inicio', data.edad_inicio)}
+${item('Intervenciones previas', data.intervenciones_previas)}
+${item('Evento desencadenante', data.evento_desencadenante)}
+${item('Descripción de intervenciones', data.descripcion_intervenciones)}
+`;
+
+document.getElementById('bloqueSeguridad').innerHTML = `
+${item('Mordida', data.mordida)}
+${item('Intento de mordida', data.intento_mordida)}
+${item('Riesgo actual', data.riesgo_actual)}
+${item('Rompió piel', data.rompio_piel)}
+${item('Atención médica o veterinaria', data.atencion_medica)}
+${item('Problema médico', data.problema_medico)}
+${item('Evaluación veterinaria', data.evaluacion_veterinaria)}
+${item('Observaciones importantes', data.observaciones_alerta)}
+`;
+
+document.getElementById('bloqueObjetivo').innerHTML = `
+${item('Objetivo', data.objetivo)}
+${item('Nivel de compromiso', data.nivel_compromiso)}
+`;
+
+estadoCarga.style.display = 'none';
+fichaContainer.style.display = 'block';
+}
+
+cargarCaso();
+</script>
+</body>
+</html>
