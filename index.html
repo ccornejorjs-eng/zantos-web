@@ -8,6 +8,7 @@
 </head>
 <body>
 <div class="app-shell">
+
 <header class="topbar">
 <div>
 <div class="brand">ZANTOS</div>
@@ -38,7 +39,10 @@
 <h2>1. Datos del perro</h2>
 <div class="section-content">
 <div class="grid-2">
-<label><span>Nombre del perro *</span><input name="nombre_perro" required></label>
+<label>
+<span>Nombre del perro *</span>
+<input name="nombre_perro" required>
+</label>
 
 <label>
 <span>Edad *</span>
@@ -59,7 +63,10 @@
 </select>
 </label>
 
-<label><span>Raza o mestizo *</span><input name="raza" required></label>
+<label>
+<span>Raza o mestizo *</span>
+<input name="raza" required>
+</label>
 
 <label>
 <span>Sexo *</span>
@@ -71,14 +78,34 @@
 </label>
 
 <label>
-<span>¿Está esterilizado? *</span>
+<span>Estado reproductivo *</span>
 <select name="esterilizado" required>
+<option value="">Seleccionar</option>
+<option>Esterilizado/a</option>
+<option>Castrado</option>
+<option>Entero/a</option>
+</select>
+</label>
+
+<label>
+<span>Edad aproximada de llegada al hogar</span>
+<input name="edad_llegada_hogar">
+</label>
+
+<label>
+<span>¿Llegó al hogar antes de los 6 meses?</span>
+<select name="destete_prematuro">
 <option value="">Seleccionar</option>
 <option>Sí</option>
 <option>No</option>
 </select>
 </label>
 </div>
+
+<label>
+<span>Historial médico relevante (fracturas, enfermedades u otros antecedentes)</span>
+<textarea name="historial_medico"></textarea>
+</label>
 </div>
 </section>
 
@@ -86,13 +113,40 @@
 <h2>2. Datos del responsable</h2>
 <div class="section-content">
 <div class="grid-2">
-<label><span>Nombre *</span><input name="nombre_tutor" required></label>
-<label><span>Teléfono *</span><input name="telefono" required></label>
-<label><span>Correo *</span><input type="email" name="correo" required></label>
-<label><span>País *</span><input name="pais" required></label>
-<label><span>Región *</span><input name="region" required></label>
-<label><span>Comuna *</span><input name="comuna" required></label>
-<label><span>Sector / localidad</span><input name="localidad"></label>
+<label>
+<span>Nombre *</span>
+<input name="nombre_tutor" required>
+</label>
+
+<label>
+<span>Teléfono *</span>
+<input name="telefono" required>
+</label>
+
+<label>
+<span>Correo *</span>
+<input type="email" name="correo" required>
+</label>
+
+<label>
+<span>País *</span>
+<input name="pais" required>
+</label>
+
+<label>
+<span>Región *</span>
+<input name="region" required>
+</label>
+
+<label>
+<span>Comuna *</span>
+<input name="comuna" required>
+</label>
+
+<label>
+<span>Sector / localidad</span>
+<input name="localidad">
+</label>
 </div>
 </div>
 </section>
@@ -109,23 +163,57 @@
 <option>Apego excesivo</option>
 <option>Miedo</option>
 <option>Fobia</option>
-<option>Reacciona ante perros/personas</option>
+<option>Reactividad ante perros, personas u otros estímulos</option>
 <option>Agresividad</option>
-<option>Protección de comida u objetos</option>
+<option>Protección de recursos</option>
 <option>Exceso de energía / hiperactividad</option>
 <option>Otro</option>
 </select>
 </label>
 
-<label><span>Problema adicional</span><input name="problema_secundario"></label>
+<label>
+<span>Problema adicional</span>
+<input name="problema_secundario">
+</label>
 </div>
 
-<label><span>Describe brevemente la situación *</span><textarea name="descripcion_motivo" required></textarea></label>
+<label>
+<span>Describe en detalle el problema conductual *</span>
+<textarea name="descripcion_motivo" required></textarea>
+</label>
+
+<label>
+<span>¿Existen antecedentes previos de problemas de comportamiento?</span>
+<select name="problemas_previos">
+<option value="">Seleccionar</option>
+<option>Sí</option>
+<option>No</option>
+</select>
+</label>
+
+<label>
+<span>Si existe historial previo, descríbelo</span>
+<textarea name="detalle_problemas_previos"></textarea>
+</label>
+
+<label>
+<span>¿Ha recibido trabajo previo con educador canino u otro profesional?</span>
+<select name="trabajo_previo">
+<option value="">Seleccionar</option>
+<option>Sí</option>
+<option>No</option>
+</select>
+</label>
+
+<label>
+<span>Si la respuesta fue sí, indica qué se trabajó o qué se intentó hacer</span>
+<textarea name="detalle_trabajo_previo"></textarea>
+</label>
 </div>
 </section>
 
 <section class="card section collapsible">
-<h2>4. Conductas que presenta</h2>
+<h2>4. Conductas observadas</h2>
 <div class="section-content">
 <div class="check-grid">
 <label><input type="checkbox" name="conductas" value="Ladra">Ladra</label>
@@ -137,20 +225,29 @@
 <label><input type="checkbox" name="conductas" value="Se esconde">Se esconde</label>
 <label><input type="checkbox" name="conductas" value="Evita">Evita</label>
 <label><input type="checkbox" name="conductas" value="Tiembla">Tiembla</label>
-<label><input type="checkbox" name="conductas" value="Protege objetos o comida">Protege objetos o comida</label>
+<label><input type="checkbox" name="conductas" value="Protege recursos">Protege recursos</label>
 <label><input type="checkbox" name="conductas" value="Persigue">Persigue</label>
 <label><input type="checkbox" name="conductas" value="Salta constantemente">Salta constantemente</label>
-<label><input type="checkbox" name="conductas" value="Está muy inquieto">Está muy inquieto</label>
+<label><input type="checkbox" name="conductas" value="Muy inquieto">Muy inquieto</label>
+<label><input type="checkbox" name="conductas" value="Vocalización excesiva">Vocalización excesiva</label>
+<label><input type="checkbox" name="conductas" value="Conducta repetitiva">Conducta repetitiva</label>
 <label><input type="checkbox" name="conductas" value="Otro">Otro</label>
 </div>
 
-<label><span>Describe con tus palabras lo que ocurre *</span><textarea name="descripcion_conducta" required></textarea></label>
-<label><span>¿Desde cuándo ocurre este problema? *</span><input name="desde_cuando" required></label>
+<label>
+<span>Describe con tus palabras lo que ocurre *</span>
+<textarea name="descripcion_conducta" required></textarea>
+</label>
+
+<label>
+<span>¿Desde cuándo ocurre este problema? *</span>
+<input name="desde_cuando" required>
+</label>
 </div>
 </section>
 
 <section class="card section collapsible">
-<h2>5. En qué situaciones ocurre</h2>
+<h2>5. Contexto de aparición</h2>
 <div class="section-content">
 <div class="check-grid">
 <label><input type="checkbox" name="contextos" value="Cuando está solo">Cuando está solo</label>
@@ -167,9 +264,25 @@
 <label><input type="checkbox" name="contextos" value="Otro">Otro</label>
 </div>
 
-<label><span>¿Qué ocurre justo antes del problema? *</span><textarea name="antecedente" required></textarea></label>
-<label><span>¿Qué ocurre después del problema? *</span><textarea name="consecuencia" required></textarea></label>
-<label><span>¿Qué o quién provoca la reacción? *</span><input name="disparador" required></label>
+<label>
+<span>¿Qué ocurre justo antes del problema? *</span>
+<textarea name="antecedente" required></textarea>
+</label>
+
+<label>
+<span>¿Qué ocurre después del problema? *</span>
+<textarea name="consecuencia" required></textarea>
+</label>
+
+<label>
+<span>¿Qué o quién provoca la reacción? *</span>
+<input name="disparador" required>
+</label>
+
+<label>
+<span>¿Cómo reaccionas tú cuando ocurre?</span>
+<textarea name="respuesta_tutor"></textarea>
+</label>
 </div>
 </section>
 
@@ -199,7 +312,10 @@
 </select>
 </label>
 
-<label><span>¿Cuánto dura normalmente?</span><input name="duracion"></label>
+<label>
+<span>¿Cuánto dura normalmente?</span>
+<input name="duracion">
+</label>
 </div>
 </div>
 </section>
@@ -214,6 +330,7 @@
 <option value="">Seleccionar</option>
 <option>Casa</option>
 <option>Departamento</option>
+<option>Otro</option>
 </select>
 </label>
 
@@ -245,25 +362,296 @@
 </label>
 
 <label>
-<span>Nivel de actividad diaria *</span>
+<span>Nivel de actividad diaria en casa *</span>
 <select name="nivel_actividad" required>
 <option value="">Seleccionar</option>
-<option>Bajo</option>
-<option>Medio</option>
-<option>Alto</option>
+<option>Tranquilo</option>
+<option>Moderado</option>
+<option>Activo</option>
 </select>
 </label>
 
-<label><span>¿Cuánto tiempo pasa solo al día? *</span><input name="tiempo_solo" required></label>
-<label><span>¿Cuánto tiempo de paseo diario tiene?</span><input name="tiempo_paseo"></label>
+<label>
+<span>¿Cuánto tiempo pasa solo al día? *</span>
+<input name="tiempo_solo" required>
+</label>
+
+<label>
+<span>¿Cuánto tiempo de paseo diario tiene?</span>
+<input name="tiempo_paseo">
+</label>
+
+<label>
+<span>¿Dónde descansa o duerme habitualmente?</span>
+<input name="lugar_descanso">
+</label>
+
+<label>
+<span>¿Tiene libre acceso a diferentes áreas del hogar?</span>
+<select name="acceso_areas">
+<option value="">Seleccionar</option>
+<option>Sí</option>
+<option>No</option>
+</select>
+</label>
+
+<label>
+<span>¿Dispone de juguetes o enriquecimiento ambiental?</span>
+<select name="juguetes_enriquecimiento">
+<option value="">Seleccionar</option>
+<option>Sí</option>
+<option>No</option>
+</select>
+</label>
+
+<label>
+<span>Si dispone de enriquecimiento, descríbelo</span>
+<input name="detalle_enriquecimiento">
+</label>
+
+<label>
+<span>¿Hay estímulos frecuentes en el hogar que puedan afectarle?</span>
+<select name="estimulos_hogar">
+<option value="">Seleccionar</option>
+<option>Sí</option>
+<option>No</option>
+</select>
+</label>
+
+<label>
+<span>Si la respuesta fue sí, indica cuáles</span>
+<input name="detalle_estimulos_hogar">
+</label>
 </div>
 
-<label><span>Describe su rutina diaria *</span><textarea name="rutina_diaria" required></textarea></label>
+<label>
+<span>Describe su rutina diaria *</span>
+<textarea name="rutina_diaria" required></textarea>
+</label>
 </div>
 </section>
 
 <section class="card section collapsible">
-<h2>8. Historia del problema</h2>
+<h2>8. Paseo, vínculo y entorno social</h2>
+<div class="section-content">
+<div class="grid-2">
+<label>
+<span>¿Quiénes participarán del proceso?</span>
+<input name="participantes_proceso" placeholder="Ej.: tutor, pareja, hijos adultos">
+</label>
+
+<label>
+<span>¿Realiza paseos o actividades con su perro? *</span>
+<select name="realiza_paseos" required>
+<option value="">Seleccionar</option>
+<option>Sí</option>
+<option>No</option>
+</select>
+</label>
+
+<label>
+<span>Frecuencia de paseos</span>
+<select name="frecuencia_paseos">
+<option value="">Seleccionar</option>
+<option>Todos los días una vez</option>
+<option>Todos los días dos veces</option>
+<option>Esporádicamente tres o más veces por semana</option>
+<option>Esporádicamente dos o menos veces por semana</option>
+<option>Nunca</option>
+</select>
+</label>
+
+<label>
+<span>Nivel de autonomía del perro</span>
+<select name="autonomia_perro">
+<option value="">Seleccionar</option>
+<option>Independiente</option>
+<option>Moderado</option>
+<option>Dependiente</option>
+<option>Muy dependiente</option>
+</select>
+</label>
+
+<label>
+<span>¿Convive con otras especies animales? *</span>
+<select name="coexisten_otras_especies" required>
+<option value="">Seleccionar</option>
+<option>Sí</option>
+<option>No</option>
+</select>
+</label>
+
+<label>
+<span>¿Cómo interactúa con otros miembros humanos de la familia?</span>
+<select name="interaccion_familia">
+<option value="">Seleccionar</option>
+<option>Permite acercamiento</option>
+<option>No permite acercamiento</option>
+<option>Permite contacto físico</option>
+<option>No permite contacto físico</option>
+</select>
+</label>
+</div>
+
+<label>
+<span>Si convive con otras especies, indique cuáles</span>
+<input name="otras_especies_detalle" placeholder="Ej.: perros, gatos, aves">
+</label>
+
+<label>
+<span>¿Cómo describirías el vínculo actual con tu perro?</span>
+<select name="vinculo_actual">
+<option value="">Seleccionar</option>
+<option>Excelente</option>
+<option>Bueno</option>
+<option>Regular</option>
+<option>Malo</option>
+</select>
+</label>
+
+<label>
+<span>Si el vínculo es regular o malo, explica por qué</span>
+<textarea name="detalle_vinculo"></textarea>
+</label>
+</div>
+</section>
+
+<section class="card section collapsible">
+<h2>9. Evaluación básica del paseo</h2>
+<div class="section-content">
+<div class="grid-2">
+<label>
+<span>¿Qué elemento usa habitualmente para el paseo?</span>
+<select name="elemento_paseo">
+<option value="">Seleccionar</option>
+<option>Collar fijo</option>
+<option>Arnés tipo H</option>
+<option>Arnés tipo Y</option>
+<option>Arnés anti tirones</option>
+<option>Halti</option>
+<option>Otro</option>
+</select>
+</label>
+
+<label>
+<span>¿Cómo reacciona al ver collar, arnés o correa?</span>
+<input name="reaccion_elementos_paseo" placeholder="Ej.: alegría, evita, se excita, huye">
+</label>
+
+<label>
+<span>¿Permite la manipulación al poner estos elementos?</span>
+<select name="manipulacion_elementos">
+<option value="">Seleccionar</option>
+<option>Permite manipulación</option>
+<option>Tolera la manipulación</option>
+<option>No permite la manipulación</option>
+</select>
+</label>
+
+<label>
+<span>¿Cómo describirías su nivel de actividad en el exterior?</span>
+<select name="actividad_exterior">
+<option value="">Seleccionar</option>
+<option>Tranquilo</option>
+<option>Moderado</option>
+<option>Activo</option>
+<option>Incontrolable</option>
+</select>
+</label>
+
+<label>
+<span>¿Qué nivel de atención mantiene hacia ti durante el paseo?</span>
+<select name="atencion_tutor_paseo">
+<option value="">Seleccionar</option>
+<option>Muy atento</option>
+<option>Moderadamente atento</option>
+<option>Poco atento</option>
+<option>Nada atento</option>
+</select>
+</label>
+
+<label>
+<span>¿Cómo reacciona ante otros perros en la calle?</span>
+<select name="reaccion_perros_calle">
+<option value="">Seleccionar</option>
+<option>Amigable</option>
+<option>Indiferente</option>
+<option>Miedoso</option>
+<option>Reactivo</option>
+<option>Agresivo</option>
+</select>
+</label>
+
+<label>
+<span>¿Cómo reacciona ante personas en la calle?</span>
+<select name="reaccion_personas_calle">
+<option value="">Seleccionar</option>
+<option>Amigable</option>
+<option>Indiferente</option>
+<option>Miedoso</option>
+<option>Reactivo</option>
+<option>Agresivo</option>
+</select>
+</label>
+
+<label>
+<span>¿Cómo reacciona ante otros animales en la calle?</span>
+<select name="reaccion_otros_animales_calle">
+<option value="">Seleccionar</option>
+<option>Amigable</option>
+<option>Indiferente</option>
+<option>Miedoso</option>
+<option>Reactivo</option>
+<option>Agresivo</option>
+</select>
+</label>
+
+<label>
+<span>¿Cómo reacciona ante ruidos fuertes?</span>
+<select name="reaccion_ruidos">
+<option value="">Seleccionar</option>
+<option>Curioso</option>
+<option>Indiferente</option>
+<option>Ansioso</option>
+<option>Miedoso</option>
+</select>
+</label>
+</div>
+
+<label>
+<span>Si reacciona ante perros, describe cómo lo hace</span>
+<textarea name="detalle_reaccion_perros"></textarea>
+</label>
+
+<label>
+<span>Si reacciona ante personas, describe cómo lo hace</span>
+<textarea name="detalle_reaccion_personas"></textarea>
+</label>
+
+<label>
+<span>Si reacciona ante otros animales, describe cómo lo hace</span>
+<textarea name="detalle_reaccion_otros_animales"></textarea>
+</label>
+
+<label>
+<span>Si reacciona ante ruidos, describe cómo lo hace</span>
+<textarea name="detalle_reaccion_ruidos"></textarea>
+</label>
+
+<label>
+<span>Señales de estrés observadas durante el paseo</span>
+<textarea name="signos_estres_paseo" placeholder="Ej.: jadeo, temblores, huida, ladridos, rigidez"></textarea>
+</label>
+
+<label>
+<span>Detalle de cuándo, dónde y cómo aparece ese estrés</span>
+<textarea name="detalle_estres_paseo"></textarea>
+</label>
+</div>
+</section>
+
+<section class="card section collapsible">
+<h2>10. Historia del problema</h2>
 <div class="section-content">
 <div class="grid-2">
 <label>
@@ -286,7 +674,10 @@
 </select>
 </label>
 
-<label><span>Edad aproximada de inicio</span><input name="edad_inicio"></label>
+<label>
+<span>Edad aproximada de inicio</span>
+<input name="edad_inicio">
+</label>
 
 <label>
 <span>¿Has intentado solucionarlo antes? *</span>
@@ -298,13 +689,20 @@
 </label>
 </div>
 
-<label><span>¿Hubo algún evento que lo haya provocado?</span><textarea name="evento_desencadenante"></textarea></label>
-<label><span>Si sí, ¿qué hiciste?</span><textarea name="descripcion_intervenciones"></textarea></label>
+<label>
+<span>¿Hubo algún evento que lo haya provocado?</span>
+<textarea name="evento_desencadenante"></textarea>
+</label>
+
+<label>
+<span>Si sí, ¿qué hiciste?</span>
+<textarea name="descripcion_intervenciones"></textarea>
+</label>
 </div>
 </section>
 
 <section class="card section collapsible">
-<h2>9. Seguridad y salud</h2>
+<h2>11. Seguridad y salud</h2>
 <div class="section-content">
 <div class="grid-2">
 <label>
@@ -371,14 +769,21 @@
 </label>
 </div>
 
-<label><span>Observaciones importantes *</span><textarea name="observaciones_alerta" required></textarea></label>
+<label>
+<span>Observaciones importantes *</span>
+<textarea name="observaciones_alerta" required></textarea>
+</label>
 </div>
 </section>
 
 <section class="card section collapsible">
-<h2>10. Objetivo</h2>
+<h2>12. Objetivo</h2>
 <div class="section-content">
-<label><span>¿Qué te gustaría lograr con este proceso? *</span><textarea name="objetivo" required></textarea></label>
+<label>
+<span>¿Qué te gustaría lograr con este proceso? *</span>
+<textarea name="objetivo" required></textarea>
+</label>
+
 <label>
 <span>Nivel de compromiso que puedes asumir *</span>
 <select name="nivel_compromiso" required>
@@ -392,12 +797,26 @@
 </section>
 
 <section class="card section collapsible">
-<h2>11. Plan de ingreso</h2>
+<h2>13. Plan de ingreso</h2>
 <div class="section-content">
 <div class="grid-3">
-<label class="plan-card"><input type="radio" name="plan" value="Evaluación inicial" checked><strong>Evaluación inicial</strong><span>Ingreso del caso y primera revisión</span></label>
-<label class="plan-card"><input type="radio" name="plan" value="Intervención estándar"><strong>Intervención estándar</strong><span>Proceso conductual estructurado</span></label>
-<label class="plan-card"><input type="radio" name="plan" value="Seguimiento intensivo"><strong>Seguimiento intensivo</strong><span>Mayor continuidad y revisión</span></label>
+<label class="plan-card">
+<input type="radio" name="plan" value="Evaluación inicial" checked>
+<strong>Evaluación inicial</strong>
+<span>Ingreso del caso y primera revisión</span>
+</label>
+
+<label class="plan-card">
+<input type="radio" name="plan" value="Intervención estándar">
+<strong>Intervención estándar</strong>
+<span>Proceso conductual estructurado</span>
+</label>
+
+<label class="plan-card">
+<input type="radio" name="plan" value="Seguimiento intensivo">
+<strong>Seguimiento intensivo</strong>
+<span>Mayor continuidad y revisión</span>
+</label>
 </div>
 </div>
 </section>
@@ -411,6 +830,7 @@
 
 </form>
 </main>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
